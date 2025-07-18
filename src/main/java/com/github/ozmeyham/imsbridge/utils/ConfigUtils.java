@@ -1,25 +1,24 @@
-package ozmeyham.imsbridge.utils;
+package com.github.ozmeyham.imsbridge.utils;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-import static com.mojang.text2speech.Narrator.LOGGER;
+// import static com.mojang.text2speech.Narrator.LOGGER;
 
-import static ozmeyham.imsbridge.utils.BridgeKeyUtils.*;
-import static ozmeyham.imsbridge.commands.BridgeColourCommand.*;
-import static ozmeyham.imsbridge.commands.CombinedBridgeColourCommand.*;
-import static ozmeyham.imsbridge.IMSBridge.*;
+import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.*;
+import static com.github.ozmeyham.imsbridge.commands.BridgeColourCommand.*;
+import static com.github.ozmeyham.imsbridge.commands.CombinedBridgeColourCommand.*;
+import static com.github.ozmeyham.imsbridge.IMSBridge.*;
 
 public class ConfigUtils {
-
     public static final String CONFIG_FILE_NAME = "imsbridge.properties";
 
     public static Path getConfigPath() {
-        return MinecraftClient.getInstance().runDirectory.toPath().resolve("config").resolve(CONFIG_FILE_NAME);
+        return FMLClientHandler.instance().getClient().mcDataDir.toPath().resolve("config").resolve(CONFIG_FILE_NAME);
     }
 
     public static void loadConfig() {

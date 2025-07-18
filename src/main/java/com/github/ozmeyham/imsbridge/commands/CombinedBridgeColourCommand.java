@@ -1,4 +1,4 @@
-package ozmeyham.imsbridge.commands;
+package com.github.ozmeyham.imsbridge.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -11,9 +11,9 @@ import com.mojang.brigadier.context.CommandContext;
 import java.util.Arrays;
 import java.util.List;
 
-import static ozmeyham.imsbridge.commands.BridgeColourCommand.COLOR_CODE_MAP;
-import static ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
-import static ozmeyham.imsbridge.utils.TextUtils.printToChat;
+import static com.github.ozmeyham.imsbridge.commands.BridgeColourCommand.COLOR_CODE_MAP;
+import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
+import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
 
 public final class CombinedBridgeColourCommand {
 

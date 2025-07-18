@@ -1,7 +1,9 @@
-package ozmeyham.imsbridge;
+package com.github.ozmeyham.imsbridge;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 
+import net.minecraftforge.fml.client.FMLClientHandler;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -18,13 +20,13 @@ import com.google.gson.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static com.mojang.text2speech.Narrator.LOGGER;
-import static ozmeyham.imsbridge.IMSBridge.*;
-import static ozmeyham.imsbridge.commands.BridgeColourCommand.*;
-import static ozmeyham.imsbridge.commands.CombinedBridgeColourCommand.*;
-import static ozmeyham.imsbridge.utils.BridgeKeyUtils.bridgeKey;
-import static ozmeyham.imsbridge.utils.TextUtils.printToChat;
-import static ozmeyham.imsbridge.utils.TextUtils.quote;
+// import static com.mojang.text2speech.Narrator.LOGGER;
+import static com.github.ozmeyham.imsbridge.utils.TextUtils.quote;
+import static com.github.ozmeyham.imsbridge.IMSBridge.*;
+import static com.github.ozmeyham.imsbridge.commands.BridgeColourCommand.*;
+import static com.github.ozmeyham.imsbridge.commands.CombinedBridgeColourCommand.*;
+import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.bridgeKey;
+import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
 
 public class ImsWebSocketClient extends WebSocketClient {
 
@@ -59,8 +61,9 @@ public class ImsWebSocketClient extends WebSocketClient {
         String colouredMsg = bridgeC1 + (guild == null ? "Bridge" : guild) + " > " + bridgeC2 + username + ": " + bridgeC3 + chatMsg;
         // Send formatted message in client chat
         if (bridgeEnabled == true) {
-            Minecraft.getMinecraft().addScheduledTask(() -> {
-                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(colouredMsg);
+            FMLClientHandler.instance().getClient().addScheduledTask(() -> {
+                IChatComponent component = new ChatComponentText(colouredMsg);
+                FMLClientHandler.instance().getClient().ingameGUI.getChatGUI().printChatMessage(component);
             });
         }
     }
@@ -69,8 +72,9 @@ public class ImsWebSocketClient extends WebSocketClient {
         String colouredMsg = cbridgeC1 + "CBridge > " + cbridgeC2 + username + ": " + cbridgeC3 + chatMsg;
         // Send formatted message in client chat
         if (combinedBridgeEnabled == true) {
-            Minecraft.getMinecraft().addScheduledTask(() -> {
-                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(colouredMsg);
+            FMLClientHandler.instance().getClient().addScheduledTask(() -> {
+                IChatComponent component = new ChatComponentText(colouredMsg);
+                FMLClientHandler.instance().getClient().ingameGUI.getChatGUI().printChatMessage(component);
             });
         }
     }

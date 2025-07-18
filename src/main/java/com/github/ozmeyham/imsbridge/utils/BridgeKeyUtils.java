@@ -1,4 +1,4 @@
-package ozmeyham.imsbridge.utils;
+package com.github.ozmeyham.imsbridge.utils;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -6,8 +6,8 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ozmeyham.imsbridge.ImsWebSocketClient.connectWebSocket;
-import static ozmeyham.imsbridge.utils.TextUtils.printToChat;
+import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.connectWebSocket;
+import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
 
 public class BridgeKeyUtils {
 

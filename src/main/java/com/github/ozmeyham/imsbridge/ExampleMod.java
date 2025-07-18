@@ -1,4 +1,4 @@
-package com.github.ozmeyham.imsbridgemod189;
+package com.github.ozmeyham.imsbridge;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.Blocks;

@@ -1,27 +1,26 @@
-package ozmeyham.imsbridge;
+package com.github.ozmeyham.imsbridge;
 
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static ozmeyham.imsbridge.ImsWebSocketClient.wsClient;
-import static ozmeyham.imsbridge.commands.BridgeColourCommand.*;
-import static ozmeyham.imsbridge.commands.BridgeCommand.*;
-import static ozmeyham.imsbridge.commands.BridgeHelpCommand.*;
-import static ozmeyham.imsbridge.commands.BridgeKeyCommand.*;
-import static ozmeyham.imsbridge.commands.CombinedBridgeColourCommand.*;
-import static ozmeyham.imsbridge.commands.CombinedBridgeHelpCommand.*;
-import static ozmeyham.imsbridge.commands.CombinedBridgeMsgCommand.*;
-import static ozmeyham.imsbridge.commands.CombinedBridgeChatCommand.*;
-import static ozmeyham.imsbridge.commands.CombinedBridgeToggleCommand.*;
-import static ozmeyham.imsbridge.utils.BridgeKeyUtils.*;
-import static ozmeyham.imsbridge.utils.ConfigUtils.loadConfig;
-import static ozmeyham.imsbridge.utils.TextUtils.quote;
+import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.wsClient;
+import static com.github.ozmeyham.imsbridge.commands.BridgeColourCommand.*;
+import static com.github.ozmeyham.imsbridge.commands.BridgeCommand.*;
+import static com.github.ozmeyham.imsbridge.commands.BridgeHelpCommand.*;
+import static com.github.ozmeyham.imsbridge.commands.BridgeKeyCommand.*;
+import static com.github.ozmeyham.imsbridge.commands.CombinedBridgeColourCommand.*;
+import static com.github.ozmeyham.imsbridge.commands.CombinedBridgeHelpCommand.*;
+import static com.github.ozmeyham.imsbridge.commands.CombinedBridgeMsgCommand.*;
+import static com.github.ozmeyham.imsbridge.commands.CombinedBridgeChatCommand.*;
+import static com.github.ozmeyham.imsbridge.commands.CombinedBridgeToggleCommand.*;
+import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.*;
+import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.loadConfig;
+import static com.github.ozmeyham.imsbridge.utils.TextUtils.quote;
 
-public class IMSBridge implements ClientModInitializer {
+public class IMSBridge {
 	public static final Logger LOGGER = LoggerFactory.getLogger("imsbridge");
 	public static Boolean bridgeEnabled = false; // enable/disable seeing bridge messages
 	public static Boolean combinedBridgeEnabled = false; // enable/disable seeing cbridge messages

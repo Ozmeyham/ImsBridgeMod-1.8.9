@@ -1,4 +1,4 @@
-package ozmeyham.imsbridge.commands;
+package com.github.ozmeyham.imsbridge.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -7,9 +7,9 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static ozmeyham.imsbridge.IMSBridge.combinedBridgeEnabled;
-import static ozmeyham.imsbridge.ImsWebSocketClient.wsClient;
-import static ozmeyham.imsbridge.utils.TextUtils.printToChat;
+import static com.github.ozmeyham.imsbridge.IMSBridge.combinedBridgeEnabled;
+import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.wsClient;
+import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
 
 public class CombinedBridgeMsgCommand {
     public static void combinedBridgeMsgCommand(CommandDispatcher<FabricClientCommandSource> dispatcher) {

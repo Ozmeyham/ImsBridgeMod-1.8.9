@@ -1,4 +1,4 @@
-package ozmeyham.imsbridge.commands;
+package com.github.ozmeyham.imsbridge.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -7,9 +7,9 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
-import static ozmeyham.imsbridge.IMSBridge.*;
-import static ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
-import static ozmeyham.imsbridge.utils.TextUtils.printToChat;
+import static com.github.ozmeyham.imsbridge.IMSBridge.*;
+import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
+import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
 
 public final class CombinedBridgeHelpCommand {
     public static void combinedBridgeHelpCommand(CommandDispatcher<FabricClientCommandSource> dispatcher) {
