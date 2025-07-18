@@ -1,14 +1,12 @@
-package ozmeyham.imsbridge.utils;
+package com.github.ozmeyham.imsbridge.utils;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
 
 public class TextUtils {
-    // Simple in-game chat print because the command is so long for some reason
+    // Print message to chat
     public static void printToChat(String msg) {
-        MinecraftClient.getInstance().execute(() ->
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("§aIMS-Bridge Mod > §r" + msg))
-        );
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("§aIMS-Bridge Mod > §r" + msg));
     }
 
     // Lightweight JSON string escaper

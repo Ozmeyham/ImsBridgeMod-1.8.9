@@ -1,29 +1,37 @@
-package ozmeyham.imsbridge.commands;
+package com.github.ozmeyham.imsbridge.commands;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.ChatComponentText;
+import static com.github.ozmeyham.imsbridge.IMSBridge.combinedBridgeEnabled;
+import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.wsClient;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static ozmeyham.imsbridge.IMSBridge.combinedBridgeEnabled;
-import static ozmeyham.imsbridge.ImsWebSocketClient.wsClient;
-import static ozmeyham.imsbridge.utils.TextUtils.printToChat;
+public class CombinedBridgeMsgCommand extends CommandBase {
+    @Override
+    public String getCommandName() {
+        return "bc";
+    }
 
-public class CombinedBridgeMsgCommand {
-    public static void combinedBridgeMsgCommand(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(LiteralArgumentBuilder.<FabricClientCommandSource>literal("bc")
-                .then(argument("message", StringArgumentType.greedyString())
-                        .executes(ctx -> {
-                            String message = StringArgumentType.getString(ctx, "message");
-                            if (combinedBridgeEnabled == false) {
-                                printToChat("§cYou have to enable combined bridge to use this command! §6§i/cbridge toggle");
-                            } else {
-                                wsClient.send("{\"from\":\"mc\",\"msg\":\"" + message + "\",\"combinedbridge\":true}");
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        })
-                ));
+    @Override
+    public String getCommandUsage(ICommandSender sender) {
+        return "/bc <message> - Send message to combined bridge";
+    }
+
+    @Override
+    public void processCommand(ICommandSender sender, String[] args) {
+        if (!combinedBridgeEnabled) {
+            sender.addChatMessage(new ChatComponentText("§cEnable cbridge first!"));
+            return;
+        }
+
+        if (args.length > 0) {
+            String message = String.join(" ", args);
+            wsClient.send("{\"from\":\"mc\",\"msg\":\"" + message + "\",\"combinedbridge\":true}");
+        }
+    }
+
+    @Override
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return true;
     }
 }

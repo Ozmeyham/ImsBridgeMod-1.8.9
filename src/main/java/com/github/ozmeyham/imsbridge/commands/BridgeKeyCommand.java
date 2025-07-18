@@ -1,37 +1,39 @@
-package ozmeyham.imsbridge.commands;
+package com.github.ozmeyham.imsbridge.commands;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.ChatComponentText;
+import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.connectWebSocket;
+import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.*;
+import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
 
-import static ozmeyham.imsbridge.IMSBridge.*;
-import static ozmeyham.imsbridge.ImsWebSocketClient.connectWebSocket;
-import static ozmeyham.imsbridge.utils.BridgeKeyUtils.*;
-import static ozmeyham.imsbridge.utils.ConfigUtils.loadConfig;
-import static ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
-import static ozmeyham.imsbridge.utils.TextUtils.printToChat;
+public class BridgeKeyCommand extends CommandBase {
+    @Override
+    public String getCommandName() {
+        return "bridgekey";
+    }
 
-public final class BridgeKeyCommand {
-    public static void bridgeKeyCommand(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(LiteralArgumentBuilder.<FabricClientCommandSource>literal("bridgekey")
-                .then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("key", StringArgumentType.word())
-                        .executes(ctx -> {
-                            String key = StringArgumentType.getString(ctx, "key");
-                            bridgeKey = key;
-                            if (isValidBridgeKey()) {
-                                saveConfigValue("bridgeKey", bridgeKey);
-                                loadConfig();
-                                LOGGER.info("Bridge key set to " + key);
-                                printToChat("§cBridge key saved as: §f" + bridgeKey);
-                                connectWebSocket();
-                            } else {
-                                printToChat("§cInvalid bridge key format! Check you pasted correctly.");
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        })
-                ));
+    @Override
+    public String getCommandUsage(ICommandSender sender) {
+        return "/bridgekey <key> - Set your bridge key";
+    }
+
+    @Override
+    public void processCommand(ICommandSender sender, String[] args) {
+        if (args.length > 0) {
+            bridgeKey = args[0];
+            if (isValidBridgeKey()) {
+                saveConfigValue("bridgeKey", bridgeKey);
+                sender.addChatMessage(new ChatComponentText("§cBridge key saved as: §f" + bridgeKey));
+                connectWebSocket("wss.ims-bridge.com");
+            } else {
+                sender.addChatMessage(new ChatComponentText("§cInvalid bridge key format!"));
+            }
+        }
+    }
+
+    @Override
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return true;
     }
 }

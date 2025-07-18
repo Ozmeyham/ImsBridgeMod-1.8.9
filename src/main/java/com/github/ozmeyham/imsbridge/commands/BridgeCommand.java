@@ -1,30 +1,34 @@
-package ozmeyham.imsbridge.commands;
+package com.github.ozmeyham.imsbridge.commands;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.ChatComponentText;
+import static com.github.ozmeyham.imsbridge.IMSBridge.*;
+import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
 
-import static ozmeyham.imsbridge.IMSBridge.*;
-import static ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
-import static ozmeyham.imsbridge.utils.TextUtils.printToChat;
+public class BridgeCommand extends CommandBase {
+    @Override
+    public String getCommandName() {
+        return "bridge";
+    }
 
-public final class BridgeCommand {
-    public static void bridgeToggleCommand(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(LiteralArgumentBuilder.<FabricClientCommandSource>literal("bridge")
-                .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("toggle")
-                        .executes(ctx -> {
-                            if (bridgeEnabled == true) {
-                                bridgeEnabled = false;
-                                saveConfigValue("bridgeEnabled", "false");
-                                printToChat("§cDisabled bridge messages!");
-                            } else {
-                                bridgeEnabled = true;
-                                saveConfigValue("bridgeEnabled", "true");
-                                printToChat("§2Enabled bridge messages!");
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        })
-                ));
+    @Override
+    public String getCommandUsage(ICommandSender sender) {
+        return "/bridge toggle - Toggle bridge messages";
+    }
+
+    @Override
+    public void processCommand(ICommandSender sender, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("toggle")) {
+            bridgeEnabled = !bridgeEnabled;
+            saveConfigValue("bridgeEnabled", String.valueOf(bridgeEnabled));
+            sender.addChatMessage(new ChatComponentText(bridgeEnabled ?
+                    "§2Enabled bridge messages!" : "§cDisabled bridge messages!"));
+        }
+    }
+
+    @Override
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return true;
     }
 }

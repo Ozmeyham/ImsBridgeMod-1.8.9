@@ -1,37 +1,39 @@
-package ozmeyham.imsbridge.commands;
+package com.github.ozmeyham.imsbridge.commands;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.ChatComponentText;
+import static com.github.ozmeyham.imsbridge.IMSBridge.*;
+import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
 
+public class CombinedBridgeChatCommand extends CommandBase {
+    @Override
+    public String getCommandName() {
+        return "cbridge";
+    }
 
-import static ozmeyham.imsbridge.IMSBridge.combinedBridgeChatEnabled;
+    @Override
+    public String getCommandUsage(ICommandSender sender) {
+        return "/cbridge chat - Toggle combined bridge chat mode";
+    }
 
-import static ozmeyham.imsbridge.IMSBridge.combinedBridgeEnabled;
-import static ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
-import static ozmeyham.imsbridge.utils.TextUtils.printToChat;
+    @Override
+    public void processCommand(ICommandSender sender, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("chat")) {
+            if (!combinedBridgeEnabled) {
+                sender.addChatMessage(new ChatComponentText("§cEnable cbridge messages first!"));
+                return;
+            }
 
-public class CombinedBridgeChatCommand {
-    public static void combinedBridgeChatCommand(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(LiteralArgumentBuilder.<FabricClientCommandSource>literal("cbridge")
-                .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("chat")
-                        .executes(ctx -> {
-                            if (combinedBridgeChatEnabled == false) {
-                                if (combinedBridgeEnabled) {
-                                    combinedBridgeChatEnabled = true;
-                                    saveConfigValue("combinedBridgeChatEnabled", "true");
-                                    printToChat("§aEnabled combined bridge chat! §e§iThis functions like /chat guild, but for cbridge.");
-                                } else {
-                                    printToChat("§cYou need to enable cbridge messages before using this command! Do /cbridge toggle");
-                                }
-                            } else {
-                                combinedBridgeChatEnabled = false;
-                                saveConfigValue("combinedBridgeChatEnabled", "false");
-                                printToChat("§cDisabled Combined Bridge Chat!");
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        })
-                ));
+            combinedBridgeChatEnabled = !combinedBridgeChatEnabled;
+            saveConfigValue("combinedBridgeChatEnabled", String.valueOf(combinedBridgeChatEnabled));
+            sender.addChatMessage(new ChatComponentText(combinedBridgeChatEnabled ?
+                    "§aEnabled combined bridge chat!" : "§cDisabled combined bridge chat!"));
+        }
+    }
+
+    @Override
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return true;
     }
 }
