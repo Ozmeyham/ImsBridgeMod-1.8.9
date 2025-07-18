@@ -1,14 +1,19 @@
 package ozmeyham.imsbridge;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
-import net.minidev.json.JSONObject;
+import net.minecraft.client.Minecraft;
+
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,9 +59,9 @@ public class ImsWebSocketClient extends WebSocketClient {
         String colouredMsg = bridgeC1 + (guild == null ? "Bridge" : guild) + " > " + bridgeC2 + username + ": " + bridgeC3 + chatMsg;
         // Send formatted message in client chat
         if (bridgeEnabled == true) {
-            MinecraftClient.getInstance().execute(() ->
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(colouredMsg))
-            );
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(colouredMsg);
+            });
         }
     }
 
@@ -64,9 +69,9 @@ public class ImsWebSocketClient extends WebSocketClient {
         String colouredMsg = cbridgeC1 + "CBridge > " + cbridgeC2 + username + ": " + cbridgeC3 + chatMsg;
         // Send formatted message in client chat
         if (combinedBridgeEnabled == true) {
-            MinecraftClient.getInstance().execute(() ->
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(colouredMsg))
-            );
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(colouredMsg);
+            });
         }
     }
 
