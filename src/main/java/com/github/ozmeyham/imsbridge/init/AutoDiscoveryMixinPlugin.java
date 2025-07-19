@@ -1,4 +1,4 @@
-package com.github.ozmeyham.imsbridgemod189.init;
+package com.github.ozmeyham.imsbridge.init;
 
 import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;

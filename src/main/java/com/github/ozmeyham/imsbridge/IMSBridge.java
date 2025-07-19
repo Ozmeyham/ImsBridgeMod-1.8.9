@@ -1,18 +1,20 @@
 package com.github.ozmeyham.imsbridge;
 
 import com.github.ozmeyham.imsbridge.commands.*;
+// import com.sun.org.slf4j.internal.LoggerFactory;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
+// import java.util.logging.Logger;
 
 import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.checkBridgeKey;
 import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.loadConfig;
 
-
+@Mod(modid = "imsbridge", useMetadata=true)
 public class IMSBridge {
-	public static final Logger LOGGER = LoggerFactory.getLogger("imsbridge");
+	// public static final Logger LOGGER = LoggerFactory.getLogger("imsbridge");
 	public static Boolean bridgeEnabled = false;
 	public static Boolean combinedBridgeEnabled = false;
 	public static Boolean combinedBridgeChatEnabled = false;

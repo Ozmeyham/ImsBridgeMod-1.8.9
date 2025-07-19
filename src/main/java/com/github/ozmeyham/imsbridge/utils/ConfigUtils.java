@@ -43,11 +43,11 @@ public class ConfigUtils {
                 props.load(in);
                 String value = props.getProperty(CONFIG_KEY, DEFAULT_VALUE);
                 if (value != null && !value.isEmpty()) {
-                    LOGGER.info("Loaded value from config: " + value);
+                    // LOGGER.info("Loaded value from config: " + value);
                     return value;
                 }
             } catch (IOException e) {
-                LOGGER.error("Failed to load value from config.", e);
+                // LOGGER.error("Failed to load value from config.", e);
             }
         }
         return null;
@@ -61,7 +61,7 @@ public class ConfigUtils {
             try (InputStream in = new FileInputStream(path.toFile())) {
                 props.load(in);
             } catch (IOException e) {
-                LOGGER.error("Failed to load existing config.", e);
+                // LOGGER.error("Failed to load existing config.", e);
             }
         }
 
@@ -71,10 +71,10 @@ public class ConfigUtils {
             if (!configDir.exists()) configDir.mkdirs();
             try (OutputStream out = new FileOutputStream(path.toFile())) {
                 props.store(out, "IMSBridge configuration");
-                LOGGER.info("Saved value to config: " + value);
+                // LOGGER.info("Saved value to config: " + value);
             }
         } catch (IOException e) {
-            LOGGER.error("Failed to save value to config.", e);
+            // LOGGER.error("Failed to save value to config.", e);
         }
     }
 }
