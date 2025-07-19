@@ -1,103 +1,124 @@
 package com.github.ozmeyham.imsbridge.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandSource;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+
 
 import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
-import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
+import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.loadConfig; // Assuming you'd want to reload config after setting colors
 
-public final class BridgeColourCommand {
+public class BridgeColourCommand extends CommandBase {
 
-    // Available colours
-    private static final List<String> VALID_COLORS = Arrays.asList(
-            "black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple",
-            "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple",
-            "yellow", "white"
-    );
-    // Default bridge colour formatting
+
     public static String bridgeC1 = "§9";
     public static String bridgeC2 = "§6";
     public static String bridgeC3 = "§f";
 
 
-    public static void bridgeColourCommand(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(LiteralArgumentBuilder.<FabricClientCommandSource>literal("bridge")
-                .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("colour")
-                        .executes(context -> {
-                            bridgeC1 = "§9"; bridgeC2 = "§6"; bridgeC3 = "§f";
-                            printToChat("§cReset bridge colour format to default.");
-                            return 1;
-                        })
-                        .then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("colour1", StringArgumentType.word())
-                                .suggests((context, builder) -> CommandSource.suggestMatching(VALID_COLORS, builder))
-                                .executes(context -> {
-                                    bridgeC1 = COLOR_CODE_MAP.getOrDefault(StringArgumentType.getString(context, "colour1"), "§9");
-                                    bridgeC2 = bridgeC1;
-                                    bridgeC3 = bridgeC1;
-                                    bridgeColourFormat();
-                                    return 1;
-                                })
-                                .then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("colour2", StringArgumentType.word())
-                                        .suggests((context, builder) -> CommandSource.suggestMatching(VALID_COLORS, builder))
-                                        .executes(context -> {
-                                            bridgeC1 = COLOR_CODE_MAP.getOrDefault(StringArgumentType.getString(context, "colour1"), "§9");
-                                            bridgeC2 = COLOR_CODE_MAP.getOrDefault(StringArgumentType.getString(context, "colour2"), "§6");
-                                            bridgeC3 = bridgeC2;
-                                            bridgeColourFormat();
-                                            return 1;
-                                        })
-                                        .then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("colour3", StringArgumentType.word())
-                                                .suggests((context, builder) -> CommandSource.suggestMatching(VALID_COLORS, builder))
-                                                .executes(context -> {
-                                                    bridgeC1 = COLOR_CODE_MAP.getOrDefault(StringArgumentType.getString(context, "colour1"), "§9");
-                                                    bridgeC2 = COLOR_CODE_MAP.getOrDefault(StringArgumentType.getString(context, "colour2"), "§6");
-                                                    bridgeC3 = COLOR_CODE_MAP.getOrDefault(StringArgumentType.getString(context, "colour3"), "§f");
-                                                    bridgeColourFormat();
-                                                    return 1;
-                                                })
-                                )
-                        )
-                )
-            )
-        );
+    private static final List<String> VALID_COLORS = Arrays.asList(
+            "black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple",
+            "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple",
+            "yellow", "white"
+    );
+
+    @Override
+    public String getCommandName() {
+        return "bridge";
     }
 
-    public static void bridgeColourFormat() {
+    @Override
+    public String getCommandUsage(ICommandSender sender) {
+        return "/bridge colour [colour1] [colour2] [colour3] or /bridge colour (resets to default)";
+    }
+
+    @Override
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+        if (args.length > 0 && args[0].equalsIgnoreCase("colour")) {
+            if (args.length == 1) {
+                bridgeC1 = "§9";
+                bridgeC2 = "§6";
+                bridgeC3 = "§f";
+                bridgeColourFormat(sender);
+                sender.addChatMessage(new ChatComponentText("§cReset bridge colour format to default."));
+            } else if (args.length == 2) {
+                String color1Name = args[1].toLowerCase();
+                if (VALID_COLORS.contains(color1Name)) {
+                    EnumChatFormatting chatFormatting = EnumChatFormatting.valueOf(color1Name.toUpperCase());
+                    bridgeC1 = chatFormatting.toString();
+                    bridgeC2 = bridgeC1;
+                    bridgeC3 = bridgeC1;
+                    bridgeColourFormat(sender);
+                } else {
+                    sender.addChatMessage(new ChatComponentText("§cInvalid color name: " + args[1]));
+                    sender.addChatMessage(new ChatComponentText("§cValid colors: " + String.join(", ", VALID_COLORS)));
+                }
+            } else if (args.length == 3) {
+                String color1Name = args[1].toLowerCase();
+                String color2Name = args[2].toLowerCase();
+
+                if (VALID_COLORS.contains(color1Name) && VALID_COLORS.contains(color2Name)) {
+                    EnumChatFormatting chatFormatting1 = EnumChatFormatting.valueOf(color1Name.toUpperCase());
+                    EnumChatFormatting chatFormatting2 = EnumChatFormatting.valueOf(color2Name.toUpperCase());
+                    bridgeC1 = chatFormatting1.toString();
+                    bridgeC2 = chatFormatting2.toString();
+                    bridgeC3 = bridgeC2;
+                    bridgeColourFormat(sender);
+                } else {
+                    sender.addChatMessage(new ChatComponentText("§cInvalid color name(s)."));
+                    sender.addChatMessage(new ChatComponentText("§cValid colors: " + String.join(", ", VALID_COLORS)));
+                }
+            } else if (args.length == 4) {
+                String color1Name = args[1].toLowerCase();
+                String color2Name = args[2].toLowerCase();
+                String color3Name = args[3].toLowerCase();
+
+                if (VALID_COLORS.contains(color1Name) && VALID_COLORS.contains(color2Name) && VALID_COLORS.contains(color3Name)) {
+                    EnumChatFormatting chatFormatting1 = EnumChatFormatting.valueOf(color1Name.toUpperCase());
+                    EnumChatFormatting chatFormatting2 = EnumChatFormatting.valueOf(color2Name.toUpperCase());
+                    EnumChatFormatting chatFormatting3 = EnumChatFormatting.valueOf(color3Name.toUpperCase());
+                    bridgeC1 = chatFormatting1.toString();
+                    bridgeC2 = chatFormatting2.toString();
+                    bridgeC3 = chatFormatting3.toString();
+                    bridgeColourFormat(sender);
+                } else {
+                    sender.addChatMessage(new ChatComponentText("§cInvalid color name(s)."));
+                    sender.addChatMessage(new ChatComponentText("§cValid colors: " + String.join(", ", VALID_COLORS)));
+                }
+            } else {
+                sender.addChatMessage(new ChatComponentText("§cUsage: " + getCommandUsage(sender)));
+            }
+        } else {
+            sender.addChatMessage(new ChatComponentText("§cUsage: " + getCommandUsage(sender)));
+        }
+    }
+
+    public static void bridgeColourFormat(ICommandSender sender) {
         saveConfigValue("bridge_colour1", bridgeC1);
         saveConfigValue("bridge_colour2", bridgeC2);
         saveConfigValue("bridge_colour3", bridgeC3);
+        loadConfig();
 
-        printToChat("§cYou have set the bridge colour format to: \n" + bridgeC1 + "Bridge > " + bridgeC2 + "Username: " + bridgeC3 + "Message");
+        sender.addChatMessage(new ChatComponentText("§cYou have set the bridge colour format to: \n" + bridgeC1 + "Bridge > " + bridgeC2 + "Username: " + bridgeC3 + "Message"));
     }
 
+    @Override
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return true;
+    }
 
-
-    public static final Map<String, String> COLOR_CODE_MAP = Map.ofEntries(
-            Map.entry("black", "§0"),
-            Map.entry("dark_blue", "§1"),
-            Map.entry("dark_green", "§2"),
-            Map.entry("dark_aqua", "§3"),
-            Map.entry("dark_red", "§4"),
-            Map.entry("dark_purple", "§5"),
-            Map.entry("gold", "§6"),
-            Map.entry("gray", "§7"),
-            Map.entry("dark_gray", "§8"),
-            Map.entry("blue", "§9"),
-            Map.entry("green", "§a"),
-            Map.entry("aqua", "§b"),
-            Map.entry("red", "§c"),
-            Map.entry("light_purple", "§d"),
-            Map.entry("yellow", "§e"),
-            Map.entry("white", "§f")
-    );
-
-
+    @Override
+    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, net.minecraft.util.BlockPos pos) {
+        if (args.length == 1) {
+            return getListOfStringsMatchingLastWord(args, "colour");
+        } else if (args.length >= 2 && args[0].equalsIgnoreCase("colour")) {
+            return getListOfStringsMatchingLastWord(args, VALID_COLORS);
+        }
+        return null;
+    }
 }

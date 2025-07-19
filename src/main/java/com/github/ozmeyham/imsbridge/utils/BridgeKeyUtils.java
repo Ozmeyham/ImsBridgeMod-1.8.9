@@ -1,18 +1,14 @@
 package com.github.ozmeyham.imsbridge.utils;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-
+import com.github.ozmeyham.imsbridge.IMSBridge;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.connectWebSocket;
-import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
 
 public class BridgeKeyUtils {
 
     public static String bridgeKey = null;
-    private static int delayTicks = 0;
     public static Boolean shouldCheckKey = true;
 
     public static boolean uuidValidator(String uuid) {
@@ -30,22 +26,10 @@ public class BridgeKeyUtils {
     public static void checkBridgeKey() {
         if (isValidBridgeKey()) {
             connectWebSocket();
+            shouldCheckKey = false;
         } else {
-            ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-                shouldCheckKey = true;
-                delayTicks = 40; // Wait ~3 seconds
-            });
-
-            ClientTickEvents.END_CLIENT_TICK.register(client -> {
-                if (shouldCheckKey && client.player != null) {
-                    if (delayTicks > 0) {
-                        delayTicks--;
-                    } else if (!isValidBridgeKey()) {
-                        printToChat("§cBridge key not set. §6Use /key on discord to obtain a key, then run /bridgekey in-game and paste your key.");
-                        shouldCheckKey = false;
-                    }
-                }
-            });
+            shouldCheckKey = true;
+            IMSBridge.delayTicks = 40;
         }
     }
 }

@@ -11,14 +11,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 // import static com.mojang.text2speech.Narrator.LOGGER;
 import static com.github.ozmeyham.imsbridge.utils.TextUtils.quote;
@@ -97,21 +92,28 @@ public class ImsWebSocketClient extends WebSocketClient {
 
     public static String getJsonValue(String jsonString, String key) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(jsonString);
-            JsonNode valueNode = node.get(key);
-            return valueNode != null ? valueNode.asText() : null;
+            JsonParser parser = new JsonParser();
+            JsonElement root = parser.parse(jsonString);
+            if (!root.isJsonObject()) {
+                return null;
+            }
+            JsonObject obj = root.getAsJsonObject();
+            JsonElement el = obj.get(key);
+            return (el != null && !el.isJsonNull()) ? el.getAsString() : null;
         } catch (Exception e) {
-            e.printStackTrace();
+            IMSBridge.LOGGER.error("Error parsing JSON for key '" + key + "'", e);
             return null;
         }
     }
 
-    public static final Map<String, String> GUILD_MAP = Map.ofEntries(
-            Map.entry("Ironman Sweats", "IMS"),
-            Map.entry("Ironman Casuals", "IMC"),
-            Map.entry("Ironman Academy", "IMA")
-    );
+    public static final Map<String, String> GUILD_MAP;
+    static {
+        Map<String, String> map = new java.util.HashMap<>();
+        map.put("Ironman Sweats", "IMS");
+        map.put("Ironman Casuals", "IMC");
+        map.put("Ironman Academy", "IMA");
+        GUILD_MAP = java.util.Collections.unmodifiableMap(map);
+    }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {

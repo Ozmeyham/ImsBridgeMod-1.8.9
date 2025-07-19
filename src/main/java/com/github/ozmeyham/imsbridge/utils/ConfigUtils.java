@@ -39,7 +39,7 @@ public class ConfigUtils {
         Path path = getConfigPath();
         Properties props = new Properties();
         if (path.toFile().exists()) {
-            try (InputStream in = new FileInputStream(path.toFile())) {
+            try (InputStream in = Files.newInputStream(path.toFile().toPath())) {
                 props.load(in);
                 String value = props.getProperty(CONFIG_KEY, DEFAULT_VALUE);
                 if (value != null && !value.isEmpty()) {
