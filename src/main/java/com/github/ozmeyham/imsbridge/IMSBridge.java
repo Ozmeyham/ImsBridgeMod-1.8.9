@@ -1,7 +1,9 @@
 package com.github.ozmeyham.imsbridge;
 
+import net.minecraft.util.ChatComponentText;
 import com.github.ozmeyham.imsbridge.commands.*;
 // import com.sun.org.slf4j.internal.LoggerFactory;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -11,6 +13,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
 import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.checkBridgeKey;
 import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.loadConfig;
+import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
 
 @Mod(modid = "imsbridge", useMetadata=true)
 public class IMSBridge {
@@ -22,7 +25,9 @@ public class IMSBridge {
 
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent event) {
+		printToChat("Loading configuration...");
 		loadConfig();
+		printToChat("Checking Bridge Key...");
 		checkBridgeKey();
 		ClientCommandHandler.instance.registerCommand(new BridgeKeyCommand());
 		ClientCommandHandler.instance.registerCommand(new BridgeCommand());

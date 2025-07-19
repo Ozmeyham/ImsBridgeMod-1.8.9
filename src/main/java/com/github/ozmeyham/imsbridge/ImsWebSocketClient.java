@@ -33,12 +33,12 @@ public class ImsWebSocketClient extends WebSocketClient {
 
     public static void connectWebSocket() {
         if (wsClient == null || !wsClient.isOpen()) {
-            // printToChat("§cConnecting to websocket...");
+            printToChat("§cConnecting to websocket...");
             try {
                 wsClient = new ImsWebSocketClient(new URI("wss://ims-bridge.com"));
                 wsClient.connect();
             } catch (URISyntaxException e) {
-                // LOGGER.error("Invalid WebSocket URI", e);
+            printToChat("Invalid Websocket URI");    // LOGGER.error("Invalid WebSocket URI", e);
             }
         }
     }
@@ -46,7 +46,7 @@ public class ImsWebSocketClient extends WebSocketClient {
     @Override
     public void onOpen(ServerHandshake handshakedata) {
         // LOGGER.info("WebSocket Connected");
-        // printToChat("§2Successfully connected to websocket.");
+        printToChat("§2Successfully connected to websocket.");
         // Send bridgeKey immediately after connecting
         if (bridgeKey != null) {
             wsClient.send("{\"from\":\"mc\",\"key\":" + quote(bridgeKey) + "}");
@@ -101,7 +101,7 @@ public class ImsWebSocketClient extends WebSocketClient {
             JsonElement el = obj.get(key);
             return (el != null && !el.isJsonNull()) ? el.getAsString() : null;
         } catch (Exception e) {
-            // IMSBridge.LOGGER.error("Error parsing JSON for key '" + key + "'", e);
+            printToChat("Error parsing JSON for key"); // IMSBridge.LOGGER.error("Error parsing JSON for key '" + key + "'", e);
             return null;
         }
     }
@@ -117,7 +117,7 @@ public class ImsWebSocketClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        // LOGGER.info("WebSocket Closed: {}", reason);
+        printToChat("Websocket closed"); // LOGGER.info("WebSocket Closed: {}", reason);
 
         if ("Invalid bridge key".equals(reason)) {
             printToChat("§4Disconnected from websocket: failed to authenticate bridge key. §6Use /bridgekey {key} to try again.");
@@ -131,7 +131,7 @@ public class ImsWebSocketClient extends WebSocketClient {
 
     @Override
     public void onError(Exception ex) {
-        // LOGGER.error("WebSocket Error", ex);
+        printToChat("Websocket Error");// LOGGER.error("WebSocket Error", ex);
     }
 
     private void tryReconnecting() {
@@ -139,10 +139,10 @@ public class ImsWebSocketClient extends WebSocketClient {
             try {
                 Thread.sleep(3000);
                 // LOGGER.info("Attempting to reconnect...");
-                // printToChat("§4Disconnected from websocket. §6Attempting to reconnect...");
+                printToChat("§4Disconnected from websocket. §6Attempting to reconnect...");
                 this.reconnect();
             } catch (InterruptedException e) {
-                // LOGGER.error("Reconnect interrupted", e);
+                printToChat("reconnect interrupted");// LOGGER.error("Reconnect interrupted", e);
                 Thread.currentThread().interrupt();
             }
         }).start();
