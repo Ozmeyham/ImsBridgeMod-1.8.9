@@ -2,22 +2,19 @@ package com.github.ozmeyham.imsbridge;
 
 import net.minecraft.util.ChatComponentText;
 import com.github.ozmeyham.imsbridge.commands.*;
-// import com.sun.org.slf4j.internal.LoggerFactory;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-
-
-// import java.util.logging.Logger;
+import net.minecraftforge.common.MinecraftForge;
+import com.github.ozmeyham.imsbridge.utils.GuildChatHandler;
 
 import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.checkBridgeKey;
 import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.loadConfig;
 import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
+import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.connectWebSocket;
 
-@Mod(modid = "imsbridge", useMetadata=true)
+@Mod(modid = "imsbridge", useMetadata = true)
 public class IMSBridge {
-	// public static final Logger LOGGER = LoggerFactory.getLogger("imsbridge");
 	public static Boolean bridgeEnabled = false;
 	public static Boolean combinedBridgeEnabled = false;
 	public static Boolean combinedBridgeChatEnabled = false;
@@ -25,10 +22,16 @@ public class IMSBridge {
 
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent event) {
+		// 1) register your chat handler...
+		MinecraftForge.EVENT_BUS.register(new GuildChatHandler());
+
 		printToChat("Loading configuration...");
 		loadConfig();
+
 		printToChat("Checking Bridge Key...");
 		checkBridgeKey();
+
+		// 2) register all your client commands
 		ClientCommandHandler.instance.registerCommand(new BridgeKeyCommand());
 		ClientCommandHandler.instance.registerCommand(new BridgeCommand());
 		ClientCommandHandler.instance.registerCommand(new BridgeColourCommand());
@@ -38,54 +41,8 @@ public class IMSBridge {
 		ClientCommandHandler.instance.registerCommand(new CombinedBridgeHelpCommand());
 		ClientCommandHandler.instance.registerCommand(new CombinedBridgeMsgCommand());
 		ClientCommandHandler.instance.registerCommand(new CombinedBridgeToggleCommand());
+
+		// 3) open the WebSocket _once_ on startup
+		connectWebSocket();
 	}
 }
-
-
-
-//	public void onInitializeClient() {
-//
-//		loadConfig();
-//		checkBridgeKey();
-//
-////		// Listen for outgoing cbridge chat messages
-////		ClientSendMessageEvents.ALLOW_CHAT.register((message) -> {
-////			if (combinedBridgeChatEnabled == true && wsClient != null && wsClient.isOpen() && bridgeKey != null) {
-////				wsClient.send("{\"from\":\"mc\",\"msg\":\"" + message + "\",\"combinedbridge\":true}");
-////				return false;
-////			} else {
-////				return true;
-////			}
-////		});
-//		// Listen for outgoing guild messages
-//		ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
-//			String content = message.getString();
-//			if (content.contains("§2Guild >")) {
-//				// Send to websocket
-//				if (wsClient != null && wsClient.isOpen() && bridgeKey != null) {
-//					wsClient.send("{\"from\":\"mc\",\"msg\":" + quote(content) + "}");
-//				}
-//			}
-//		});
-//
-//		// Register "/bridgekey <key>" command to input bridge key
-//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> bridgeKeyCommand(dispatcher));
-//		// Register "/bridge toggle" command to toggle receiving bridge messages
-//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> bridgeToggleCommand(dispatcher));
-//		// Register "/bridge colour" command to format bridge messages.
-//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> bridgeColourCommand(dispatcher));
-//		// Register "/bridge help" command to explain command usage.
-//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> bridgeHelpCommand(dispatcher));
-//
-//		// Register "/cbridge toggle" command to toggle receiving cbridge messages.
-//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> combinedBridgeToggleCommand(dispatcher));
-//		// Register "/cbridge chat" command to toggle cbridge chat functionality
-//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> combinedBridgeChatCommand(dispatcher));
-//		// Register "/bc <msg>" command to send messages to cbridge.
-//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> combinedBridgeMsgCommand(dispatcher));
-//		// Register "/cbridge colour" command to format cbridge messages.
-//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> combinedBridgeColourCommand(dispatcher));
-//		// Register "/cbridge help" command to explain cbridge command usage.
-//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> combinedBridgeHelpCommand(dispatcher));
-//	}
-//}

@@ -40,16 +40,11 @@ loom {
     }
     forge {
         pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
-        // If you don't want mixins, remove this lines
-        mixinConfig("mixins.$modid.json")
+
         if (transformerFile.exists()) {
             println("Installing access transformer")
             accessTransformer(transformerFile)
         }
-    }
-    // If you don't want mixins, remove these lines
-    mixin {
-        defaultRefmapName.set("mixins.$modid.refmap.json")
     }
 }
 
@@ -74,8 +69,7 @@ dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
-    ("'org.java-websocket:Java-WebSocket:1.5.4'")
-    modImplementation("org.java-websocket:Java-WebSocket:1.5.4")
+    shadowImpl("org.java-websocket:Java-WebSocket:1.5.4")
 
     // If you don't want mixins, remove these lines
     shadowImpl("org.spongepowered:mixin:0.7.11-SNAPSHOT") {

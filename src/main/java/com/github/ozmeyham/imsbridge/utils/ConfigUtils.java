@@ -1,13 +1,10 @@
 package com.github.ozmeyham.imsbridge.utils;
 
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.FMLClientHandler;
 
-import java.io.*;
-import java.nio.file.Files;
+import java.io.File;
 import java.nio.file.Path;
-import java.util.Properties;
-
-// import static com.mojang.text2speech.Narrator.LOGGER;
 
 import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.*;
 import static com.github.ozmeyham.imsbridge.commands.BridgeColourCommand.*;
@@ -15,66 +12,49 @@ import static com.github.ozmeyham.imsbridge.commands.CombinedBridgeColourCommand
 import static com.github.ozmeyham.imsbridge.IMSBridge.*;
 
 public class ConfigUtils {
-    public static final String CONFIG_FILE_NAME = "imsbridge.properties";
+    public static final String CONFIG_FILE_NAME = "imsbridge.cfg";
 
     public static Path getConfigPath() {
-        return FMLClientHandler.instance().getClient().mcDataDir.toPath().resolve("config").resolve(CONFIG_FILE_NAME);
+        return FMLClientHandler
+                .instance()
+                .getClient()
+                .mcDataDir
+                .toPath()
+                .resolve("config")
+                .resolve(CONFIG_FILE_NAME);
     }
 
     public static void loadConfig() {
-        bridgeKey = loadConfigValue("bridgeKey", null);
-        bridgeC1 = loadConfigValue("bridge_colour1","§9");
-        bridgeC2 = loadConfigValue("bridge_colour2","§6");
-        bridgeC3 = loadConfigValue("bridge_colour3","§f");
-        cbridgeC1 = loadConfigValue("cbridge_colour1","§4");
-        cbridgeC2 = loadConfigValue("cbridge_colour2","§6");
-        cbridgeC3 = loadConfigValue("cbridge_colour3","§f");
+        File configFile = getConfigPath().toFile();
+        Configuration cfg = new Configuration(configFile);
+        cfg.load();
 
-        combinedBridgeEnabled = Boolean.valueOf(loadConfigValue("combinedBridgeEnabled","true"));
-        bridgeEnabled = Boolean.valueOf(loadConfigValue("bridgeEnabled","true"));
-        combinedBridgeChatEnabled = Boolean.valueOf(loadConfigValue("combinedBridgeChatEnabled","false"));
+        // Load string values
+        bridgeKey               = cfg.getString("bridgeKey",               Configuration.CATEGORY_GENERAL, "",    "IMSBridge API key");
+        System.out.println("bridgeKey: " + bridgeKey);
+
+        bridgeC1               = cfg.getString("bridge_colour1",          Configuration.CATEGORY_GENERAL, "§9",  "Bridge colour 1");
+        bridgeC2               = cfg.getString("bridge_colour2",          Configuration.CATEGORY_GENERAL, "§6",  "Bridge colour 2");
+        bridgeC3               = cfg.getString("bridge_colour3",          Configuration.CATEGORY_GENERAL, "§f",  "Bridge colour 3");
+        cbridgeC1              = cfg.getString("cbridge_colour1",         Configuration.CATEGORY_GENERAL, "§4",  "Combined bridge colour 1");
+        cbridgeC2              = cfg.getString("cbridge_colour2",         Configuration.CATEGORY_GENERAL, "§6",  "Combined bridge colour 2");
+        cbridgeC3              = cfg.getString("cbridge_colour3",         Configuration.CATEGORY_GENERAL, "§f",  "Combined bridge colour 3");
+
+        // Load boolean values
+        combinedBridgeEnabled  = cfg.getBoolean("combinedBridgeEnabled",  Configuration.CATEGORY_GENERAL, false,  "Enable combined bridge chat");
+        bridgeEnabled          = cfg.getBoolean("bridgeEnabled",          Configuration.CATEGORY_GENERAL, true,   "Enable Minecraft→Discord bridge");
+        combinedBridgeChatEnabled = cfg.getBoolean("combinedBridgeChatEnabled", Configuration.CATEGORY_GENERAL, false, "Enable combined chat mode");
+
+        if (cfg.hasChanged()) {
+            cfg.save();
+        }
     }
 
-    public static String loadConfigValue(String CONFIG_KEY, String DEFAULT_VALUE) {
-        Path path = getConfigPath();
-        Properties props = new Properties();
-        if (path.toFile().exists()) {
-            try (InputStream in = Files.newInputStream(path.toFile().toPath())) {
-                props.load(in);
-                String value = props.getProperty(CONFIG_KEY, DEFAULT_VALUE);
-                if (value != null && !value.isEmpty()) {
-                    // LOGGER.info("Loaded value from config: " + value);
-                    return value;
-                }
-            } catch (IOException e) {
-                // LOGGER.error("Failed to load value from config.", e);
-            }
-        }
-        return null;
-    }
-
-    public static void saveConfigValue(String CONFIG_KEY, String value) {
-        Path path = getConfigPath();
-        Properties props = new Properties();
-
-        if (Files.exists(path)) {
-            try (InputStream in = new FileInputStream(path.toFile())) {
-                props.load(in);
-            } catch (IOException e) {
-                // LOGGER.error("Failed to load existing config.", e);
-            }
-        }
-
-        props.setProperty(CONFIG_KEY, value);
-        try {
-            File configDir = path.getParent().toFile();
-            if (!configDir.exists()) configDir.mkdirs();
-            try (OutputStream out = new FileOutputStream(path.toFile())) {
-                props.store(out, "IMSBridge configuration");
-                // LOGGER.info("Saved value to config: " + value);
-            }
-        } catch (IOException e) {
-            // LOGGER.error("Failed to save value to config.", e);
-        }
+    public static void saveConfigValue(String key, String value) {
+        File configFile = getConfigPath().toFile();
+        Configuration cfg = new Configuration(configFile);
+        cfg.load();
+        cfg.get(Configuration.CATEGORY_GENERAL, key, value).set(value);
+        cfg.save();
     }
 }

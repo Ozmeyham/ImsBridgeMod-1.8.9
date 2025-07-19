@@ -26,14 +26,17 @@ public class BridgeKeyUtils {
 
     public static void checkBridgeKey() {
         printToChat("Checking bridge key...");
+        System.out.println("Checking bridge key...");
         if (isValidBridgeKey()) {
             connectWebSocket();
             shouldCheckKey = false;
             printToChat("Bridge key valid!");
+            System.out.println("Bridge key valid!");
         } else {
             shouldCheckKey = true;
             IMSBridge.delayTicks = 40;
             printToChat("Bridge key invalid!");
+            System.out.println("Bridge key invalid!");
         }
     }
 }
