@@ -1,3 +1,4 @@
+// src/main/java/com/github/ozmeyham/imsbridge/commands/CombinedBridgeChatAliasCommand.java
 package com.github.ozmeyham.imsbridge.commands;
 
 import com.github.ozmeyham.imsbridge.IMSBridge;
@@ -19,7 +20,7 @@ public class CombinedBridgeChatAliasCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        // === copied from CombinedBridgeCommand#case "chat" ===
+        // exact same toggle logic as in CombinedBridgeCommand's "chat" case
         IMSBridge.combinedBridgeChatEnabled = !IMSBridge.combinedBridgeChatEnabled;
         ConfigUtils.saveConfigValue(
                 "combinedBridgeChatEnabled",

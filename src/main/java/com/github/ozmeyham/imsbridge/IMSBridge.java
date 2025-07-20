@@ -2,6 +2,8 @@
 
 package com.github.ozmeyham.imsbridge;
 
+import com.github.ozmeyham.imsbridge.handlers.ChatGuiOpenHandler;  // ← new
+import com.github.ozmeyham.imsbridge.utils.GuildChatHandler;
 import com.github.ozmeyham.imsbridge.commands.*;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -27,7 +29,10 @@ public class IMSBridge {
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent event) {
 		// listen for in-game guild chat:
-		MinecraftForge.EVENT_BUS.register(new com.github.ozmeyham.imsbridge.utils.GuildChatHandler());
+		MinecraftForge.EVENT_BUS.register(new GuildChatHandler());
+
+		// ← NEW: when the vanilla chat GUI opens, swap in your PrefixingChatGui
+		MinecraftForge.EVENT_BUS.register(new ChatGuiOpenHandler());
 
 		printToChat("Loading configuration...");
 		loadConfig();          // ← reads config file and populates bridgeC1…cbridgeC3
@@ -42,6 +47,5 @@ public class IMSBridge {
 		ClientCommandHandler.instance.registerCommand(new CombinedBridgeChatAliasCommand());
 		ClientCommandHandler.instance.registerCommand(new CombinedBridgeMessageAliasCommand());
 		ClientCommandHandler.instance.registerCommand(new CombinedBridgeToggleAliasCommand());
-
 	}
 }
