@@ -1,6 +1,7 @@
 package com.github.ozmeyham.imsbridge.utils;
 
 import com.github.ozmeyham.imsbridge.IMSBridge;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,12 +10,12 @@ import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
 
 public class BridgeKeyUtils {
 
+    // your stored bridge key
     public static String bridgeKey = null;
     public static Boolean shouldCheckKey = true;
 
     public static boolean uuidValidator(String uuid) {
         String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$";
-
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(uuid);
         return matcher.matches();

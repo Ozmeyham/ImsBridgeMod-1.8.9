@@ -19,7 +19,7 @@ public class GuildChatHandler {
                 payload.addProperty("from", "mc");
                 payload.addProperty("msg", raw);
                 ImsWebSocketClient.wsClient.send(payload.toString());
-                printToChat("§aIMS-Bridge Mod > §r§7Sent to bridge: " + raw);
+                // printToChat("§aIMS-Bridge Mod > §r§7Sent to bridge: " + raw);
             } else {
                 printToChat("§aIMS-Bridge Mod > §r§cNot connected to WebSocket, dropping guild message");
             }

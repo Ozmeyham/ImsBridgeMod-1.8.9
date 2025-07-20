@@ -1,37 +1,41 @@
+// src/main/java/com/github/ozmeyham/imsbridge/IMSBridge.java
+
 package com.github.ozmeyham.imsbridge;
 
-import net.minecraft.util.ChatComponentText;
 import com.github.ozmeyham.imsbridge.commands.*;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.common.MinecraftForge;
-import com.github.ozmeyham.imsbridge.utils.GuildChatHandler;
 
 import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.checkBridgeKey;
 import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.loadConfig;
 import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
-import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.connectWebSocket;
 
 @Mod(modid = "imsbridge", useMetadata = true)
 public class IMSBridge {
-	public static Boolean bridgeEnabled = false;
-	public static Boolean combinedBridgeEnabled = false;
-	public static Boolean combinedBridgeChatEnabled = false;
-	public static Integer delayTicks = 0;
+	// toggles
+	public static boolean bridgeEnabled           = false;
+	public static boolean combinedBridgeEnabled   = false;
+	public static boolean combinedBridgeChatEnabled = false;
+	public static int     delayTicks              = 0;
+
+	// ← these six get filled from config/imsbridge.cfg at startup:
+	public static String bridgeC1, bridgeC2, bridgeC3;
+	public static String cbridgeC1, cbridgeC2, cbridgeC3;
 
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent event) {
-		// 1) register your chat handler...
-		MinecraftForge.EVENT_BUS.register(new GuildChatHandler());
+		// listen for in-game guild chat:
+		MinecraftForge.EVENT_BUS.register(new com.github.ozmeyham.imsbridge.utils.GuildChatHandler());
 
 		printToChat("Loading configuration...");
-		loadConfig();
+		loadConfig();          // ← reads config file and populates bridgeC1…cbridgeC3
 
 		printToChat("Checking Bridge Key...");
-		checkBridgeKey();
+		checkBridgeKey();      // ← kicks off your websocket if the key is valid
 
-		// 2) register all your client commands
+		// register all of your /bridge* and /cbridge* commands:
 		ClientCommandHandler.instance.registerCommand(new BridgeKeyCommand());
 		ClientCommandHandler.instance.registerCommand(new BridgeCommand());
 		ClientCommandHandler.instance.registerCommand(new BridgeColourCommand());
@@ -41,8 +45,5 @@ public class IMSBridge {
 		ClientCommandHandler.instance.registerCommand(new CombinedBridgeHelpCommand());
 		ClientCommandHandler.instance.registerCommand(new CombinedBridgeMsgCommand());
 		ClientCommandHandler.instance.registerCommand(new CombinedBridgeToggleCommand());
-
-		// 3) open the WebSocket _once_ on startup
-		connectWebSocket();
 	}
 }

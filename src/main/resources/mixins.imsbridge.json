@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.7.11",
+  "package": "com.github.ozmeyham.imsbridge.mixins",
+  "mixins": [],
+  "client": [],
+  "server": []
+}

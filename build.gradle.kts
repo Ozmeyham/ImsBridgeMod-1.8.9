@@ -40,11 +40,16 @@ loom {
     }
     forge {
         pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
-
+        // If you don't want mixins, remove this lines
+        mixinConfig("mixins.$modid.json")
         if (transformerFile.exists()) {
             println("Installing access transformer")
             accessTransformer(transformerFile)
         }
+    }
+    // If you don't want mixins, remove these lines
+    mixin {
+        defaultRefmapName.set("mixins.$modid.refmap.json")
     }
 }
 

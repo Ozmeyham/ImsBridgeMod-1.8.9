@@ -4,15 +4,12 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 
-import java.util.List;
-
-import static com.github.ozmeyham.imsbridge.IMSBridge.combinedBridgeEnabled;
-import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.wsClient;
-import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
+import com.github.ozmeyham.imsbridge.IMSBridge;
+import com.github.ozmeyham.imsbridge.ImsWebSocketClient;
 
 public class CombinedBridgeMsgCommand extends CommandBase {
-
     @Override
     public String getCommandName() {
         return "bc";
@@ -20,34 +17,50 @@ public class CombinedBridgeMsgCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/bc <message>: Sends a message to combined bridge.";
+        return "/bc <message>";
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        if (args.length > 0) {
-            String message = String.join(" ", args);
-            if (!combinedBridgeEnabled) {
-                printToChat("§cYou have to enable combined bridge to use this command! §6§o/cbridge toggle");
-            } else {
-                if (wsClient != null && wsClient.isOpen()) { // Check if WebSocket client is connected
-                    wsClient.send("{\"from\":\"mc\",\"msg\":\"" + message + "\",\"combinedbridge\":true}");
-                } else {
-                    printToChat("§cWebSocket client not connected. Please ensure IMSBridge is running and connected.");
-                }
-            }
-        } else {
-            sender.addChatMessage(new ChatComponentText("§cUsage: " + getCommandUsage(sender)));
+        if (args.length < 1) {
+            throw new CommandException("Usage: " + getCommandUsage(sender));
         }
+
+        // assemble your full message
+        String msg = joinStrings(args, 0);
+
+        if (IMSBridge.combinedBridgeEnabled
+                && ImsWebSocketClient.wsClient != null
+                && ImsWebSocketClient.wsClient.isOpen()) {
+            // send over the bridge
+            ImsWebSocketClient.wsClient.send("{\"from\":\"mc\",\"msg\":\"" + msg + "\",\"combinedbridge\":true}");
+            sender.addChatMessage(new ChatComponentText(
+                    EnumChatFormatting.GREEN + "Sent to combined bridge: " + msg
+            ));
+        } else {
+            sender.addChatMessage(new ChatComponentText(
+                    EnumChatFormatting.RED + "Combined bridge is not enabled or not connected."
+            ));
+        }
+    }
+
+    /**
+     * Simple helper to join an array of strings with spaces,
+     * starting at the given index.
+     */
+    private static String joinStrings(String[] args, int startIndex) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = startIndex; i < args.length; i++) {
+            if (i > startIndex) {
+                sb.append(' ');
+            }
+            sb.append(args[i]);
+        }
+        return sb.toString();
     }
 
     @Override
     public boolean canCommandSenderUseCommand(ICommandSender sender) {
         return true;
-    }
-
-    @Override
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, net.minecraft.util.BlockPos pos) {
-        return null;
     }
 }

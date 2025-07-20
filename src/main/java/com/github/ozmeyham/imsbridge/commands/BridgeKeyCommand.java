@@ -4,21 +4,11 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.connectWebSocket; // Ensure this method exists and is compatible
-import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.bridgeKey;
-import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.isValidBridgeKey; // Ensure this method exists and is compatible
-import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.loadConfig;
-import static com.github.ozmeyham.imsbridge.utils.ConfigUtils.saveConfigValue;
-import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
+import com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils;
 
 public class BridgeKeyCommand extends CommandBase {
-
-    private static final Logger LOGGER = LogManager.getLogger("IMSBridge"); // Use your mod ID or a suitable name
-
     @Override
     public String getCommandName() {
         return "bridgekey";
@@ -26,40 +16,32 @@ public class BridgeKeyCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/bridgekey <key>: Sets your bridge key to use the mod.";
+        return "/bridgekey <key>";
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        if (args.length == 1) {
-            String key = args[0];
-            bridgeKey = key;
-
-            if (isValidBridgeKey()) {
-                saveConfigValue("bridgeKey", bridgeKey);
-                loadConfig();
-
-                LOGGER.info("Bridge key set to " + key);
-                printToChat("§cBridge key saved as: §f" + bridgeKey);
-
-                connectWebSocket();
-            } else {
-                printToChat("§cInvalid bridge key format! Check you pasted correctly.");
-            }
-        } else {
-            sender.addChatMessage(new ChatComponentText("§cUsage: " + getCommandUsage(sender)));
+        if (args.length != 1) {
+            throw new CommandException("Usage: " + getCommandUsage(sender));
         }
+
+        String key = args[0];
+        if (!BridgeKeyUtils.uuidValidator(key)) {
+            sender.addChatMessage(new ChatComponentText(
+                    EnumChatFormatting.RED + "Invalid bridge key format!"
+            ));
+            return;
+        }
+
+        BridgeKeyUtils.bridgeKey = key;
+        sender.addChatMessage(new ChatComponentText(
+                EnumChatFormatting.GREEN + "Bridge key set to: " + key
+        ));
+        BridgeKeyUtils.checkBridgeKey();
     }
 
     @Override
     public boolean canCommandSenderUseCommand(ICommandSender sender) {
         return true;
-    }
-
-
-    @Override
-    public java.util.List<String> addTabCompletionOptions(ICommandSender sender, String[] args, net.minecraft.util.BlockPos pos) {
-
-        return null;
     }
 }

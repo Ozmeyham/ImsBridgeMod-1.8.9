@@ -1,29 +1,31 @@
 package com.github.ozmeyham.imsbridge.commands;
 
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 
 public class BridgeHelpCommand extends CommandBase {
-
     @Override
     public String getCommandName() {
-        return "";
+        return "bridgehelp";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "";
+        return "/bridgehelp";
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        sender.addChatMessage(new ChatComponentText(
-                "\\n§c/bridgekey <key>: §fSets your bridge key so that you can use the mod.\\n"+
-                "§c/bridge toggle: §fEnables/disables client-side bridge message rendering.\n" +
-                "§c/bridge colour <colour1> <colour2> <colour3>: §fSets the colour formatting of rendered bridge messages.\\n" +
-                "§c/bridge colour: §fSets the colour formatting back to default.\\n" +
-                "§c/bridge help: §fShows this message.\\n"));
+    public void processCommand(ICommandSender sender, String[] args) {
+        sender.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "=== IMS Bridge Commands ==="));
+        sender.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "/bridgekey <key> " + EnumChatFormatting.WHITE + "- Set your bridge key"));
+        sender.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "/bridge toggle " + EnumChatFormatting.WHITE + "- Enable/disable guild messages"));
+        sender.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "/bridgecolour <c1> <c2> <c3> " + EnumChatFormatting.WHITE + "- Change guild message colours"));
+    }
+
+    @Override
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return true;
     }
 }
