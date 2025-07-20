@@ -1,30 +1,28 @@
 package com.github.ozmeyham.imsbridge.commands;
 
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
-
 import com.github.ozmeyham.imsbridge.IMSBridge;
 
-public class CombinedBridgeToggleCommand extends CommandBase {
+public class BridgeToggleAliasCommand extends CommandBase {
     @Override
     public String getCommandName() {
-        return "cbridgetoggle";
+        return "bt";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/cbridgetoggle";
+        return "/bt";
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        IMSBridge.combinedBridgeEnabled = !IMSBridge.combinedBridgeEnabled;
+    public void processCommand(ICommandSender sender, String[] args) {
+        IMSBridge.bridgeEnabled = !IMSBridge.bridgeEnabled;
         sender.addChatMessage(new ChatComponentText(
-                EnumChatFormatting.YELLOW + "Combined bridge messages " +
-                        (IMSBridge.combinedBridgeEnabled ? "enabled" : "disabled")
+                EnumChatFormatting.GREEN +
+                        "Guild bridge " + (IMSBridge.bridgeEnabled ? "enabled" : "disabled") + "!"
         ));
     }
 

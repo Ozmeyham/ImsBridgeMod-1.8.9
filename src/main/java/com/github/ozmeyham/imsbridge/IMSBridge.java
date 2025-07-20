@@ -36,14 +36,12 @@ public class IMSBridge {
 		checkBridgeKey();      // ← kicks off your websocket if the key is valid
 
 		// register all of your /bridge* and /cbridge* commands:
-		ClientCommandHandler.instance.registerCommand(new BridgeKeyCommand());
+		ClientCommandHandler.instance.registerCommand(new CombinedBridgeCommand());
 		ClientCommandHandler.instance.registerCommand(new BridgeCommand());
-		ClientCommandHandler.instance.registerCommand(new BridgeColourCommand());
-		ClientCommandHandler.instance.registerCommand(new BridgeHelpCommand());
-		ClientCommandHandler.instance.registerCommand(new CombinedBridgeChatCommand());
-		ClientCommandHandler.instance.registerCommand(new CombinedBridgeColourCommand());
-		ClientCommandHandler.instance.registerCommand(new CombinedBridgeHelpCommand());
-		ClientCommandHandler.instance.registerCommand(new CombinedBridgeMsgCommand());
-		ClientCommandHandler.instance.registerCommand(new CombinedBridgeToggleCommand());
+		ClientCommandHandler.instance.registerCommand(new BridgeToggleAliasCommand());
+		ClientCommandHandler.instance.registerCommand(new CombinedBridgeChatAliasCommand());
+		ClientCommandHandler.instance.registerCommand(new CombinedBridgeMessageAliasCommand());
+		ClientCommandHandler.instance.registerCommand(new CombinedBridgeToggleAliasCommand());
+
 	}
 }
