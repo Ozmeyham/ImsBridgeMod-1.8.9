@@ -1,35 +1,34 @@
 package com.github.ozmeyham.imsbridge;
 
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
-
-import net.minecraftforge.fml.client.FMLClientHandler;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
-// import static com.mojang.text2speech.Narrator.LOGGER;
-import static com.github.ozmeyham.imsbridge.utils.TextUtils.quote;
-import static com.github.ozmeyham.imsbridge.IMSBridge.*;
-import static com.github.ozmeyham.imsbridge.commands.BridgeColourCommand.*;
-import static com.github.ozmeyham.imsbridge.commands.CombinedBridgeColourCommand.*;
-import static com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils.bridgeKey;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
+
+import static com.github.ozmeyham.imsbridge.IMSBridge.bridgeEnabled;
+import static com.github.ozmeyham.imsbridge.IMSBridge.combinedBridgeEnabled;
+// pull your colours from IMSBridge now:
+import static com.github.ozmeyham.imsbridge.IMSBridge.bridgeC1;
+import static com.github.ozmeyham.imsbridge.IMSBridge.bridgeC2;
+import static com.github.ozmeyham.imsbridge.IMSBridge.bridgeC3;
+import static com.github.ozmeyham.imsbridge.IMSBridge.cbridgeC1;
+import static com.github.ozmeyham.imsbridge.IMSBridge.cbridgeC2;
+import static com.github.ozmeyham.imsbridge.IMSBridge.cbridgeC3;
+
 import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
+import com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils;
 
 public class ImsWebSocketClient extends WebSocketClient {
-
     public static ImsWebSocketClient wsClient;
 
     public ImsWebSocketClient(URI serverUri) {
@@ -38,111 +37,154 @@ public class ImsWebSocketClient extends WebSocketClient {
 
     public static void connectWebSocket() {
         if (wsClient == null || !wsClient.isOpen()) {
-            // printToChat("§cConnecting to websocket...");
+            printToChat("§cConnecting to websocket…");
             try {
-                wsClient = new ImsWebSocketClient(new URI("wss://ims-bridge.com"));
+                wsClient = new ImsWebSocketClient(new URI("ws://ims-bridge.com:3000"));
+                // disable the built-in ping/timeout so Forge won't drop us
+                wsClient.setConnectionLostTimeout(0);
                 wsClient.connect();
             } catch (URISyntaxException e) {
-                LOGGER.error("Invalid WebSocket URI", e);
+                e.printStackTrace();
+                printToChat("Invalid WebSocket URI: " + e.getMessage());
             }
         }
     }
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        LOGGER.info("WebSocket Connected");
-        // printToChat("§2Successfully connected to websocket.");
-        // Send bridgeKey immediately after connecting
-        if (bridgeKey != null) {
-            wsClient.send("{\"from\":\"mc\",\"key\":" + quote(bridgeKey) + "}");
-        }
-    }
-    private void bridgeMessage(String chatMsg, String username, String guild) {
-        String colouredMsg = bridgeC1 + (guild == null ? "Bridge" : guild) + " > " + bridgeC2 + username + ": " + bridgeC3 + chatMsg;
-        // Send formatted message in client chat
-        if (bridgeEnabled == true) {
-            FMLClientHandler.instance().getClient().addScheduledTask(() -> {
-                IChatComponent component = new ChatComponentText(colouredMsg);
-                FMLClientHandler.instance().getClient().ingameGUI.getChatGUI().printChatMessage(component);
-            });
-        }
-    }
-
-    private void cbridgeMessage(String chatMsg, String username, String guild) {
-        String colouredMsg = cbridgeC1 + "CBridge > " + cbridgeC2 + username + ": " + cbridgeC3 + chatMsg;
-        // Send formatted message in client chat
-        if (combinedBridgeEnabled == true) {
-            FMLClientHandler.instance().getClient().addScheduledTask(() -> {
-                IChatComponent component = new ChatComponentText(colouredMsg);
-                FMLClientHandler.instance().getClient().ingameGUI.getChatGUI().printChatMessage(component);
-            });
+        printToChat("§2Successfully connected to websocket.");
+        String key = BridgeKeyUtils.bridgeKey;
+        if (key != null && !key.isEmpty()) {
+            JsonObject auth = new JsonObject();
+            auth.addProperty("from", "mc");
+            auth.addProperty("key", key);
+            wsClient.send(auth.toString());
+            printToChat("§aIMS-Bridge Mod > §r§7Sent auth JSON: " + auth.toString());
         }
     }
 
     @Override
     public void onMessage(String message) {
-        //printToChat(message);
-        String msg = getJsonValue(message, "msg");
-        String[] split = msg.split(": ", 2);
-        String username = split.length > 0 ? split[0] : "";
-        String chatMsg = split.length > 1 ? split[1] : "";
-        String guild = GUILD_MAP.get(getJsonValue(message, "guild"));
-
-        if (message.contains("\"combinedbridge\":true")){
-            cbridgeMessage(chatMsg, username, guild);
-        } else if (message.contains("\"from\":\"discord\"")){
-            bridgeMessage(chatMsg, username, guild);
-        }
-    }
-
-    public static String getJsonValue(String jsonString, String key) {
+        JsonObject obj;
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(jsonString);
-            JsonNode valueNode = node.get(key);
-            return valueNode != null ? valueNode.asText() : null;
+            obj = new JsonParser().parse(message).getAsJsonObject();
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            printToChat("§4Received non-JSON data, ignoring: " + message);
+            return;
+        }
+
+        // 1) Handle any "response" field from the server (e.g. command acks)
+        JsonElement resp = obj.get("response");
+        if (resp != null && !resp.isJsonNull()) {
+            printToChat("§aIMS-Bridge Response > §r§7" + resp.getAsString());
+            return;
+        }
+
+        // 2) Now we only care about actual chat messages
+        JsonElement msgEl = obj.get("msg");
+        if (msgEl == null || msgEl.isJsonNull()) return;
+        String full = msgEl.getAsString();
+
+        // do we have a combined-bridge flag?
+        boolean combined = obj.has("combinedbridge")
+                && !obj.get("combinedbridge").isJsonNull()
+                && obj.get("combinedbridge").getAsBoolean();
+
+        // was it sent from Discord?
+        JsonElement fromEl = obj.get("from");
+        String from = fromEl != null && !fromEl.isJsonNull()
+                ? fromEl.getAsString() : null;
+
+        // ignore anything not from discord or not a combined msg
+        if (!"discord".equals(from) && !combined) return;
+
+        // split out user/message
+        String[] parts = full.split(": ", 2);
+        String user = parts.length > 0 ? parts[0] : "";
+        String text = parts.length > 1 ? parts[1] : "";
+
+        // look up guild code
+        JsonElement guildEl = obj.get("guild");
+        String guildKey = guildEl != null && !guildEl.isJsonNull()
+                ? guildEl.getAsString() : null;
+        String guild = GUILD_MAP.get(guildKey);
+
+        if (combined) {
+            cbridgeMessage(text, user, guild);
+        } else {
+            bridgeMessage(text, user, guild);
         }
     }
-
-    public static final Map<String, String> GUILD_MAP = Map.ofEntries(
-            Map.entry("Ironman Sweats", "IMS"),
-            Map.entry("Ironman Casuals", "IMC"),
-            Map.entry("Ironman Academy", "IMA")
-    );
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        LOGGER.info("WebSocket Closed: {}", reason);
-
+        printToChat("§aIMS-Bridge Mod > §rWebsocket closed: " + reason);
         if ("Invalid bridge key".equals(reason)) {
-            printToChat("§4Disconnected from websocket: failed to authenticate bridge key. §6Use /bridgekey {key} to try again.");
-            LOGGER.warn("Not reconnecting due to invalid key.");
-            return; // Don't attempt to reconnect
+            printToChat("§4Authentication failed. Use /bridgekey {key} to retry.");
+            return;
         }
-        if (bridgeKey != null) {
-            tryReconnecting();
+        if (BridgeKeyUtils.bridgeKey != null
+                && !BridgeKeyUtils.bridgeKey.isEmpty()
+                && !remote) {
+            scheduleReconnect();
         }
     }
 
     @Override
     public void onError(Exception ex) {
-        LOGGER.error("WebSocket Error", ex);
+        // bubble up errors from onMessage (like JsonNull) into chat
+        String err = ex.getClass().getSimpleName() + ": " + ex.getMessage();
+        printToChat("§4WebSocket Error – " + err);
+        try { closeBlocking(); } catch (InterruptedException ignore) { Thread.currentThread().interrupt(); }
+        if (BridgeKeyUtils.bridgeKey != null && !BridgeKeyUtils.bridgeKey.isEmpty()) {
+            scheduleReconnect();
+        }
     }
 
-    private void tryReconnecting() {
+    private void bridgeMessage(String msg, String user, String guild) {
+        String txt = bridgeC1
+                + (guild == null ? "Bridge" : guild)
+                + " > " + bridgeC2
+                + user + ": " + bridgeC3 + msg;
+        if (bridgeEnabled) scheduleChat(txt);
+    }
+
+    private void cbridgeMessage(String msg, String user, String guild) {
+        String txt = cbridgeC1 + "CBridge > " + cbridgeC2
+                + user + ": " + cbridgeC3 + msg;
+        if (combinedBridgeEnabled) scheduleChat(txt);
+    }
+
+    private void scheduleChat(String text) {
+        FMLClientHandler.instance()
+                .getClient()
+                .addScheduledTask(() -> {
+                    IChatComponent comp = new ChatComponentText(text);
+                    FMLClientHandler.instance()
+                            .getClient()
+                            .ingameGUI.getChatGUI()
+                            .printChatMessage(comp);
+                });
+    }
+
+    private void scheduleReconnect() {
         new Thread(() -> {
             try {
-                Thread.sleep(3000);
-                LOGGER.info("Attempting to reconnect...");
-                // printToChat("§4Disconnected from websocket. §6Attempting to reconnect...");
-                this.reconnect();
+                Thread.sleep(5000);
+                printToChat("§6Reconnecting to WebSocket…");
+                wsClient.reconnect();
             } catch (InterruptedException e) {
-                LOGGER.error("Reconnect interrupted", e);
                 Thread.currentThread().interrupt();
             }
         }).start();
+    }
+
+    public static final Map<String,String> GUILD_MAP;
+    static {
+        Map<String,String> m = new java.util.HashMap<>();
+        m.put("Ironman Sweats","IMS");
+        m.put("Ironman Casuals","IMC");
+        m.put("Ironman Academy","IMA");
+        GUILD_MAP = java.util.Collections.unmodifiableMap(m);
     }
 }
