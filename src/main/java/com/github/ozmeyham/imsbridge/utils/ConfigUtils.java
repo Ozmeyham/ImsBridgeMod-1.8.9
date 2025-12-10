@@ -48,7 +48,7 @@ public class ConfigUtils {
         combinedBridgeEnabled    = cfg.getBoolean(
                 "combinedBridgeEnabled",
                 Configuration.CATEGORY_GENERAL,
-                false,
+                true,
                 "Enable combined bridge chat"
         );
         bridgeEnabled            = cfg.getBoolean(
