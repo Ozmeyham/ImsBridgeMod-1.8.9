@@ -18,7 +18,7 @@ public class PrefixingChatGui extends GuiChat {
         // if combined‐chat is enabled AND it’s NOT a slash command…
         if (IMSBridge.combinedBridgeChatEnabled && !text.startsWith("/")) {
             // prefix with /bc and send
-            super.sendChatMessage("/bc " + text);
+            super.sendChatMessage("/cbc " + text);
         } else {
             // otherwise behave exactly like vanilla
             super.sendChatMessage(text);

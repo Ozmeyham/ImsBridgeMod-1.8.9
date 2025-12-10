@@ -19,7 +19,7 @@ public class CombinedBridgeToggleAliasCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        // === copied from CombinedBridgeCommand#case "toggle" ===
+        // === copied from CombinedBridgeCommands#case "toggle" ===
         IMSBridge.combinedBridgeEnabled = !IMSBridge.combinedBridgeEnabled;
         ConfigUtils.saveConfigValue(
                 "combinedBridgeEnabled",
@@ -27,8 +27,8 @@ public class CombinedBridgeToggleAliasCommand extends CommandBase {
         );
         TextUtils.printToChat(
                 IMSBridge.combinedBridgeEnabled
-                        ? "§aEnabled combined bridge!"
-                        : "§cDisabled combined bridge!"
+                        ? "§aEnabled combined bridge messages!"
+                        : "§cDisabled combined bridge messages!"
         );
     }
 

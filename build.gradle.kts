@@ -13,7 +13,6 @@ plugins {
 val baseGroup: String by project
 val mcVersion: String by project
 val version: String by project
-val mixinGroup = "$baseGroup.mixin"
 val modid: String by project
 val transformerFile = file("src/main/resources/accesstransformer.cfg")
 
@@ -41,16 +40,12 @@ loom {
     forge {
         pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
         // If you don't want mixins, remove this lines
-        mixinConfig("mixins.$modid.json")
         if (transformerFile.exists()) {
             println("Installing access transformer")
             accessTransformer(transformerFile)
         }
     }
     // If you don't want mixins, remove these lines
-    mixin {
-        defaultRefmapName.set("mixins.$modid.refmap.json")
-    }
 }
 
 sourceSets.main {
@@ -75,11 +70,10 @@ dependencies {
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
     shadowImpl("org.java-websocket:Java-WebSocket:1.5.4")
+    shadowImpl("org.slf4j:slf4j-api:1.7.36")
+    shadowImpl("org.slf4j:slf4j-simple:1.7.36")
 
     // If you don't want mixins, remove these lines
-    shadowImpl("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
-        isTransitive = false
-    }
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT")
 
     // If you don't want to log in with your real minecraft account, remove this line
@@ -99,9 +93,6 @@ tasks.withType(org.gradle.jvm.tasks.Jar::class) {
         this["FMLCorePluginContainsFMLMod"] = "true"
         this["ForceLoadAsMod"] = "true"
 
-        // If you don't want mixins, remove these lines
-        this["TweakClass"] = "org.spongepowered.asm.launch.MixinTweaker"
-        this["MixinConfigs"] = "mixins.$modid.json"
         if (transformerFile.exists())
             this["FMLAT"] = "${modid}_at.cfg"
     }
@@ -143,7 +134,10 @@ tasks.shadowJar {
     }
 
     // If you want to include other dependencies and shadow them, you can relocate them in here
-    fun relocate(name: String) = relocate(name, "$baseGroup.deps.$name")
+    fun reloc(name: String) = relocate(name, "$baseGroup.deps.$name")
+
+    reloc("org.java_websocket")
+    reloc("org.slf4j")
 }
 
 tasks.assemble.get().dependsOn(tasks.remapJar)

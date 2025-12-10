@@ -12,8 +12,6 @@ public class BridgeKeyUtils {
 
     // your stored bridge key
     public static String bridgeKey = null;
-    public static Boolean shouldCheckKey = true;
-
     public static boolean uuidValidator(String uuid) {
         String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$";
         Pattern pattern = Pattern.compile(regex);
@@ -23,21 +21,5 @@ public class BridgeKeyUtils {
 
     public static Boolean isValidBridgeKey() {
         return bridgeKey != null && !bridgeKey.isEmpty() && uuidValidator(bridgeKey);
-    }
-
-    public static void checkBridgeKey() {
-        printToChat("Checking bridge key...");
-        System.out.println("Checking bridge key...");
-        if (isValidBridgeKey()) {
-            connectWebSocket();
-            shouldCheckKey = false;
-            printToChat("Bridge key valid!");
-            System.out.println("Bridge key valid!");
-        } else {
-            shouldCheckKey = true;
-            IMSBridge.delayTicks = 40;
-            printToChat("Bridge key invalid!");
-            System.out.println("Bridge key invalid!");
-        }
     }
 }

@@ -29,7 +29,6 @@ public class ConfigUtils {
         Configuration cfg = new Configuration(configFile);
         cfg.load();
 
-        // your API key lives in BridgeKeyUtils.bridgeKey
         bridgeKey = cfg.getString(
                 "bridgeKey",
                 Configuration.CATEGORY_GENERAL,
@@ -38,14 +37,14 @@ public class ConfigUtils {
         );
 
         // load all six colour fields into the static IMSBridge.* variables
-        bridgeC1  = cfg.getString("bridge_colour1",  Configuration.CATEGORY_GENERAL, "§9", "Bridge colour 1");
-        bridgeC2  = cfg.getString("bridge_colour2",  Configuration.CATEGORY_GENERAL, "§6", "Bridge colour 2");
-        bridgeC3  = cfg.getString("bridge_colour3",  Configuration.CATEGORY_GENERAL, "§f", "Bridge colour 3");
-        cbridgeC1 = cfg.getString("cbridge_colour1", Configuration.CATEGORY_GENERAL, "§4", "Combined bridge colour 1");
-        cbridgeC2 = cfg.getString("cbridge_colour2", Configuration.CATEGORY_GENERAL, "§6", "Combined bridge colour 2");
-        cbridgeC3 = cfg.getString("cbridge_colour3", Configuration.CATEGORY_GENERAL, "§f", "Combined bridge colour 3");
+        bridgeC1  = cfg.getString("bridgeC1",  Configuration.CATEGORY_GENERAL, "§9", "Bridge colour 1");
+        bridgeC2  = cfg.getString("bridgeC2",  Configuration.CATEGORY_GENERAL, "§6", "Bridge colour 2");
+        bridgeC3  = cfg.getString("bridgeC3",  Configuration.CATEGORY_GENERAL, "§f", "Bridge colour 3");
+        cbridgeC1 = cfg.getString("combinedBridgeC1", Configuration.CATEGORY_GENERAL, "§4", "Combined bridge colour 1");
+        cbridgeC2 = cfg.getString("combinedBridgeC2", Configuration.CATEGORY_GENERAL, "§6", "Combined bridge colour 2");
+        cbridgeC3 = cfg.getString("combinedBridgeC3", Configuration.CATEGORY_GENERAL, "§f", "Combined bridge colour 3");
 
-        // load your toggles, too (if you want to drive them from config)
+        // load toggles, too (if you want to drive them from config)
         combinedBridgeEnabled    = cfg.getBoolean(
                 "combinedBridgeEnabled",
                 Configuration.CATEGORY_GENERAL,
@@ -64,7 +63,12 @@ public class ConfigUtils {
                 false,
                 "Enable combined chat mode"
         );
-
+        firstLogin = cfg.getBoolean(
+                "firstLogin",
+                Configuration.CATEGORY_GENERAL,
+                true,
+                "Whether or not this is the clients first login with the mod"
+        );
         if (cfg.hasChanged()) {
             cfg.save();
         }

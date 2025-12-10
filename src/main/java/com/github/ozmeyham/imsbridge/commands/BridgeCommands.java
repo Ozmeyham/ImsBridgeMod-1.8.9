@@ -1,6 +1,7 @@
 package com.github.ozmeyham.imsbridge.commands;
 
 import com.github.ozmeyham.imsbridge.IMSBridge;
+import com.github.ozmeyham.imsbridge.ImsWebSocketClient;
 import com.github.ozmeyham.imsbridge.utils.BridgeKeyUtils;
 import com.github.ozmeyham.imsbridge.utils.ConfigUtils;
 import com.github.ozmeyham.imsbridge.utils.TextUtils;
@@ -11,7 +12,10 @@ import net.minecraftforge.fml.client.FMLClientHandler;
 
 import java.util.*;
 
-public class BridgeCommand extends CommandBase {
+import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.wsClient;
+import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
+
+public class BridgeCommands extends CommandBase {
     public static final Map<String, String> COLOR_CODE_MAP;
     static {
         Map<String, String> m = new LinkedHashMap<>();
@@ -40,19 +44,14 @@ public class BridgeCommand extends CommandBase {
     }
 
     @Override
-    public List<String> getCommandAliases() {
-        return Collections.singletonList("");
-    }
-
-    @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/bridge <help|key|toggle|color>";
+        return "/bridge <help|key|toggle|colour|online>";
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-            printHelp();
+        if (args.length == 0) {
+            TextUtils.printToChat("§cUsage: /bridge <help|key|toggle|colour|online>");
             return;
         }
 
@@ -64,28 +63,40 @@ public class BridgeCommand extends CommandBase {
 
             case "key":
                 if (args.length < 2) {
-                    TextUtils.printToChat("§cUsage: /bridge key <key>");
+                    printToChat("§cUsage: /bridge key <key>");
                 } else {
                     String key = args[1];
                     BridgeKeyUtils.bridgeKey = key;
-                    ConfigUtils.saveConfigValue("bridgeKey", key);
-                    TextUtils.printToChat("§aBridge key set to: §f" + key);
+                    if (BridgeKeyUtils.isValidBridgeKey()) {
+                        ConfigUtils.saveConfigValue("bridgeKey", key);
+                        ConfigUtils.loadConfig();
+                        printToChat("§cBridge key saved as: §f" + key);
+                        ImsWebSocketClient.connectWebSocket();
+                    } else {
+                        printToChat("§cInvalid bridge key format! Check you pasted correctly.");
+                    }
                 }
                 break;
 
             case "toggle":
                 IMSBridge.bridgeEnabled = !IMSBridge.bridgeEnabled;
                 ConfigUtils.saveConfigValue("bridgeEnabled", String.valueOf(IMSBridge.bridgeEnabled));
-                TextUtils.printToChat(
+                printToChat(
                         IMSBridge.bridgeEnabled
-                                ? "§aEnabled guild bridge!"
-                                : "§cDisabled guild bridge!"
+                                ? "§aEnabled guild bridge messages!"
+                                : "§cDisabled guild bridge messages!"
                 );
                 break;
 
-            case "color":
+            case "colour":
                 if (args.length < 4) {
-                    TextUtils.printToChat("§cUsage: /bridge color <tagColor> <senderColor> <msgColor>");
+                    IMSBridge.bridgeC1 = COLOR_CODE_MAP.get("dark_green");
+                    IMSBridge.bridgeC2 = COLOR_CODE_MAP.get("gold");
+                    IMSBridge.bridgeC3 = COLOR_CODE_MAP.get("white");
+                    ConfigUtils.saveConfigValue("bridgeC1", IMSBridge.bridgeC1);
+                    ConfigUtils.saveConfigValue("bridgeC2", IMSBridge.bridgeC2);
+                    ConfigUtils.saveConfigValue("bridgeC3", IMSBridge.bridgeC3);
+                    printToChat("§cYou have set the bridge colour format to: \n" + IMSBridge.bridgeC1 + "Guild > " + IMSBridge.bridgeC2 + "Username" + " §9[DISC]§f: " + IMSBridge.bridgeC3 + "Message");
                 } else {
                     String c1 = args[1].toLowerCase(Locale.ROOT);
                     String c2 = args[2].toLowerCase(Locale.ROOT);
@@ -93,7 +104,7 @@ public class BridgeCommand extends CommandBase {
                     if (!COLOR_CODE_MAP.containsKey(c1)
                             || !COLOR_CODE_MAP.containsKey(c2)
                             || !COLOR_CODE_MAP.containsKey(c3)) {
-                        TextUtils.printToChat("§cInvalid color! Valid options: " + COLOR_CODE_MAP.keySet());
+                        printToChat("§cInvalid colour! Valid options: " + COLOR_CODE_MAP.keySet());
                     } else {
                         IMSBridge.bridgeC1 = COLOR_CODE_MAP.get(c1);
                         IMSBridge.bridgeC2 = COLOR_CODE_MAP.get(c2);
@@ -101,15 +112,22 @@ public class BridgeCommand extends CommandBase {
                         ConfigUtils.saveConfigValue("bridgeC1", IMSBridge.bridgeC1);
                         ConfigUtils.saveConfigValue("bridgeC2", IMSBridge.bridgeC2);
                         ConfigUtils.saveConfigValue("bridgeC3", IMSBridge.bridgeC3);
-                        TextUtils.printToChat(
-                                "§aBridge colors set to: §f" + c1 + " §f" + c2 + " §f" + c3
-                        );
+                        printToChat("§cYou have set the bridge colour format to: \n" + IMSBridge.bridgeC1 + "Guild > " + IMSBridge.bridgeC2 + "Username" + " §9[DISC]§f: " + IMSBridge.bridgeC3 + "Message");
+
                     }
                 }
                 break;
 
+            case "online":
+                if (wsClient != null && wsClient.isOpen()) {
+                    wsClient.send("{\"from\":\"mc\",\"request\":\"getOnlinePlayers\"}");
+                } else {
+                    printToChat("§cYou are not connected to the bridge server!");
+                }
+                break;
+
             default:
-                TextUtils.printToChat("§cUnknown subcommand! Try /bridge help");
+                printToChat("§cUnknown subcommand! Try /bridge help");
         }
     }
 
@@ -119,16 +137,12 @@ public class BridgeCommand extends CommandBase {
     }
 
     private void printHelp() {
-        String helpMsg = "§6=== Guild Bridge Commands === \n" +
-                "§c/bridge help §f- Shows all available bridge commands along with helpful descriptions \n" +
-                "§c/bridge key <key> §f- Sets your bridge key (If you don't have this do /key in Discord) \n" +
-                "§c/bridge toggle §f- Toggles guild bridge on or off \n" +
-                "§c/bridge color <Color1> <Color2> <Color3> §f- Sets colors of Tag, Sender, and Message respectively for guild bridge \n" +
-                "§6=== Combined Bridge Commands === \n" +
-                "§c/cbridge toggle §f- Toggles combined bridge on or off \n" +
-                "§c/cbridge color <Color1> <Color2> <Color3> §f- Sets colors of Tag, Sender, and Message respectively for combined bridge \n" +
-                "§c/bc <message> §f- Sends a message to combined bridge \n" +
-                "§c/cbridge chat §f- Sets your selected chat to combined bridge";
+        String helpMsg = "§9§l-- Bridge Help -- \n" +
+                "§9/bridge key <key>: §7Sets your bridge key; obtain key via discord bot. \n" +
+                "§9/bridge toggle: §7Enables/disables bridge message rendering. \n" +
+                "§9/bridge colour <colour1> <colour2> <colour3>: §7Sets the colour formatting of rendered bridge messages. \n" +
+                "§9/bridge colour: §7Sets the colour formatting back to default. \n" +
+                "§9/bridge online: §6(alias /bl) §7Shows a list of online guildmates using this mod.";
 
         FMLClientHandler.instance().getClient().ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(helpMsg));
     }
