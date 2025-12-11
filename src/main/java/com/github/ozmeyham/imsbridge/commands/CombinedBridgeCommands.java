@@ -5,6 +5,7 @@ import com.github.ozmeyham.imsbridge.ImsWebSocketClient;
 import com.github.ozmeyham.imsbridge.utils.ConfigUtils;
 import com.github.ozmeyham.imsbridge.utils.TextUtils;
 import com.google.gson.JsonObject;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
@@ -12,6 +13,8 @@ import net.minecraftforge.fml.client.FMLClientHandler;
 
 import java.util.*;
 
+import static com.github.ozmeyham.imsbridge.IMSBridge.combinedBridgeEnabled;
+import static com.github.ozmeyham.imsbridge.ImsWebSocketClient.wsClient;
 import static com.github.ozmeyham.imsbridge.utils.TextUtils.printToChat;
 
 public class CombinedBridgeCommands extends CommandBase {
@@ -29,13 +32,16 @@ public class CombinedBridgeCommands extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/cbridge <help|toggle|colour|cbc|chat>";
+        return "/cbridge <help|toggle|colour|cbc|chat|party>";
     }
+
+    public static long lastParty = -1;
+    public static int partySpotsLeft = -1;
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length == 0) {
-            TextUtils.printToChat("§cUsage: /cbridge <help|toggle|colour|cbc|chat>");
+            TextUtils.printToChat("§cUsage: " + getCommandUsage(sender));
             return;
         }
 
@@ -97,6 +103,43 @@ public class CombinedBridgeCommands extends CommandBase {
                                     : "§cExited combined bridge chat!"
                     );
                 }
+                break;
+
+            case "party":
+                if (args.length < 3) {
+                    TextUtils.printToChat("§cUsage: /cbridge party <number of people> <reason>");
+                    return;
+                }
+                int partyCap;
+                try {
+                    partyCap = Integer.parseInt(args[1]);
+                } catch (NumberFormatException e) {
+                    TextUtils.printToChat("§cUsage: /cbridge party <number of people> <reason>");
+                    return;
+                }
+                partySpotsLeft = partyCap;
+                String reason = "";
+                for (int i = 2; i < args.length; i++) {
+                    reason += args[i] + " ";
+                }
+
+                String message = reason.trim() + ". Do !join " + Minecraft.getMinecraft().thePlayer.getName() + " to join! (" + partyCap + " spots)";
+
+                if (!combinedBridgeEnabled) {
+                    printToChat("§cYou need to enable combined bridge messages to use this command! §6§o/cbridge toggle");
+                } else {
+                    if (wsClient != null && wsClient.isOpen()) { // Check if WebSocket client is connected
+                        JsonObject payload = new JsonObject();
+                        payload.addProperty("from", "mc");
+                        payload.addProperty("msg", message);
+                        payload.addProperty("combinedbridge", true);
+                        ImsWebSocketClient.wsClient.send(payload.toString());
+                        lastParty = System.currentTimeMillis();
+                    } else {
+                        printToChat("§cYou are not connected to the bridge websocket server!");
+                    }
+                }
+
                 break;
 
             default:

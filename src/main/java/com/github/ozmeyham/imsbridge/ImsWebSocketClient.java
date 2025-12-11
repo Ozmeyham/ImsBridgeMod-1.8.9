@@ -4,11 +4,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import com.github.ozmeyham.imsbridge.commands.CombinedBridgeCommands;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.fml.client.FMLClientHandler;
@@ -171,8 +175,34 @@ public class ImsWebSocketClient extends WebSocketClient {
     }
 
     private void cbridgeMessage(String chatMsg, String username, String guild, String guildColour) {
+        if (!combinedBridgeEnabled) return;
         String formattedMsg = cbridgeC1 + "CB > " + cbridgeC2 + username + guildColour + " [" + guild + "]§f: " + cbridgeC3 + chatMsg;
-        if (combinedBridgeEnabled) scheduleChat(formattedMsg);
+        if (chatMsg.contains("Do !join ") && chatMsg.contains(" to join!")) {
+            String ignToJoin;
+            try {
+                ignToJoin = chatMsg.split("!join ")[1].split(" ")[0];
+
+                IChatComponent comp = new ChatComponentText(formattedMsg);
+                comp = comp.setChatStyle(comp.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cbc !join " + ignToJoin)));
+                comp = comp.setChatStyle(comp.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("§eRuns /cbc !join " + ignToJoin))));
+                comp = comp.appendText(" §eClick here to join the party");
+                scheduleChat(comp);
+            } catch (Exception e) {
+                scheduleChat(formattedMsg);
+            }
+            return;
+        } else {
+            scheduleChat(formattedMsg);
+        }
+
+
+        if (CombinedBridgeCommands.partySpotsLeft <= 0 || System.currentTimeMillis() > CombinedBridgeCommands.lastParty + 300000) return;
+
+        String joinCommand = "!join " + Minecraft.getMinecraft().thePlayer.getName();
+        if (chatMsg.equalsIgnoreCase(joinCommand)) {
+            CombinedBridgeCommands.partySpotsLeft -= 1;
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/party invite " + username);
+        }
     }
 
     private void scheduleChat(String text) {
@@ -186,6 +216,18 @@ public class ImsWebSocketClient extends WebSocketClient {
                             .printChatMessage(comp);
                 });
     }
+
+    private void scheduleChat(IChatComponent text) {
+        FMLClientHandler.instance()
+                .getClient()
+                .addScheduledTask(() -> {
+                    FMLClientHandler.instance()
+                            .getClient()
+                            .ingameGUI.getChatGUI()
+                            .printChatMessage(text);
+                });
+    }
+
 
 
     public static final Map<String,String> GUILD_MAP;
