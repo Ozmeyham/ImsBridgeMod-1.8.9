@@ -1,0 +1,9 @@
+{
+  "package": "com.github.ozmeyham.imsbridge.mixin",
+  "refmap": "mixins.${modid}.refmap.json",
+  "minVersion": "0.7",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "MixinChat"
+  ]
+}
