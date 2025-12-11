@@ -48,8 +48,8 @@ public class ConfigUtils {
         combinedBridgeEnabled    = cfg.getBoolean(
                 "combinedBridgeEnabled",
                 Configuration.CATEGORY_GENERAL,
-                false,
-                "Enable combined bridge chat"
+                true,
+                "Enable combined bridge messages"
         );
         bridgeEnabled            = cfg.getBoolean(
                 "bridgeEnabled",
@@ -61,7 +61,7 @@ public class ConfigUtils {
                 "combinedBridgeChatEnabled",
                 Configuration.CATEGORY_GENERAL,
                 false,
-                "Enable combined chat mode"
+                "Enable combined chat chat"
         );
         firstLogin = cfg.getBoolean(
                 "firstLogin",
