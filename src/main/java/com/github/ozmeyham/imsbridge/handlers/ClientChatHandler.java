@@ -25,6 +25,14 @@ public class ClientChatHandler {
                 ImsWebSocketClient.wsClient.send(payload.toString());
                 // printToChat("§aIMS-Bridge Mod > §r§7Sent to bridge: " + content);
             }
+        } else if (content.endsWith(" joined the guild!") || content.endsWith(" left the guild!")) {
+            if (ImsWebSocketClient.wsClient != null && ImsWebSocketClient.wsClient.isOpen() && bridgeKey != null) {
+                JsonObject payload = new JsonObject();
+                payload.addProperty("from","mc");
+                payload.addProperty("msg", content);
+                payload.addProperty("guildMemberChange", "true");
+                ImsWebSocketClient.wsClient.send(payload.toString());
+            }
         } else if (isSkyblockChannelChange(content) && combinedBridgeChatEnabled) {
             combinedBridgeChatEnabled = false;
             saveConfigValue("combinedBridgeChatEnabled", "false");
