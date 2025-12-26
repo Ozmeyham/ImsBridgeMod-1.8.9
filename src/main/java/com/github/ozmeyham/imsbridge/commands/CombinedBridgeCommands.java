@@ -157,6 +157,7 @@ public class CombinedBridgeCommands extends CommandBase {
                 "§b/cbridge toggle: §6(alias /cbt) §7Enables/disables cbridge message rendering. \n" +
                 "§b/cbridge colour <colour1> <colour2> <colour3>: §7Sets the colour formatting of rendered cbridge messages. \n" +
                 "§b/cbridge colour: §7Sets the colour formatting back to default. \n" +
+                "§b/cbridge party [playerCap] [reason]: §7Sends a message in cbridge that you have an open party, and lets people join with !join ign. \n" +
                 "§b/cbridge chat: §6(alias /cbc or /bc) §7Enter/exit cbridge chat (like how \"/chat guild\" works). \n" +
                 "§b/cbc <msg> §6or §b/bc <msg>: §7Sends msg to cbridge.";
 
