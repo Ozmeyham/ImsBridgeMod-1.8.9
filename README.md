@@ -7,18 +7,22 @@ IMS Bridge is a Minecraft mod designed for IMS guilds and their members. It faci
 - Users only see client-side messages, they are not sent through a bridge bot like most other bridges do.
 - A completely separate combined bridge chat can be used by all members of IMS guilds to communicate with each other both in-game and through Discord.
 
+The backend server code for the bridge and Discord bot can be found [here](https://github.com/N1K0LAAAA/ImsBridgeServer).
+
 ## Installation
 
 Download the latest .jar file from [releases](https://github.com/Ozmeyham/ImsBridgeMod-1.8.9/releases)
 and place it in your mods folder. This is the Forge version for Minecraft 1.8.9 and requires
-both Forge and Java to be installed. For the latest Fabric release (1.21 and up) see [here](https://github.com/Ozmeyham/ImsBridgeMod-1.21.5).
+both Forge and Java to be installed. 
+
+For the latest Fabric release (1.21 and up) see [this repo](https://github.com/Ozmeyham/ImsBridgeMod-1.21.5).
 
 ## Configuration
 
 Once you have installed the mod, you will need to obtain a bridge key via ```/key``` on Discord.
 This key is your bridge "password" and it is important that you do not accidentally send this in guild chat or share it with anyone.
 
-Once you have your bridge key, you can run ```/bridge key <key>``` in-game (replace \<key\> with your bridge key). You should then be connected to the server and can test this with /bridge online. 
+Once you have your bridge key, you can run ```/bridge key <key>``` in-game (replace \<key\> with your bridge key). You should then be connected to the server after a few seconds and can test this with ```/cbc hi chat```. 
 
 You can run ```/bridge help``` and ```/cbridge help``` to see available commands for using and configuring the mod.
 
@@ -27,7 +31,7 @@ If you very recently joined an IMS guild and receive an error when attempting to
 ## Commands
 ```/cbridge toggle``` and ```/bridge toggle``` - Enables/disables combined bridge and regular bridge message rendering respectively, similar to ```/guild toggle```.
 
-```/cbc <msg>``` or ```/bc <msg>``` - Sends a single message to cbridge, similar to how ```/gc <msg>``` works.
+```/cbc <msg>``` or ```/bc <msg>``` - Sends a single message to combined bridge, similar to how ```/gc <msg>``` works.
 
 ```/cbridge chat``` or ```/cbc``` or ```/bc``` - Enters/exits cbridge chat, similar to how ```/chat g``` works. This allows users to send messages in cbridge without having to use a prefix command. 
 
@@ -35,11 +39,24 @@ If you very recently joined an IMS guild and receive an error when attempting to
 
 ```/cbridge colour``` and ```/bridge colour``` - Resets the colour formatting back to default.
 
+```/cbridge party <playerCap> <reason>``` - Sends a message in cbridge to say you have an open party, and lets other people join by typing ```!join <leaderIGN>```
+
 ```/bridge key <key>``` - Allows the user to input their UUID bridge key for authentication to use bridge.
 
-```/bridge online``` or ```/bl``` - Lists all online guild members using the mod. Useful for using cbridge.
+```/bridge online``` or ```/bl``` - Lists all online guild members using the mod. Useful when using cbridge to talk to specific people in other guilds.
 
 ```/cbridge help``` and ```/bridge help``` - Displays a help message for the above commands.
+
+## Discord Commands
+```/key``` - Sends the users bridge key via DM.
+
+```/reset-key``` - Invalidates the users bridge key and sends them a new one via DM.
+
+```/stats``` - Displays the number of online players with the bridge mod in each guild.
+
+```/revoke-access <minecraftIGN>``` - Admin only command, invalidates the targeted users bridge key.
+
+```/restore-access <minecraftIGN>``` - Admin only command, restores access for a player whose access was revoked.
 
 ## Discord & Support
 
